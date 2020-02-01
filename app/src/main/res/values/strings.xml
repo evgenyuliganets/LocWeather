@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">LocWeather</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="button">Button</string>
+    <string name="title_location_permission" />
+    <string name="text_location_permission" />
+    <string name="ok" />
+</resources>
