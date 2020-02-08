@@ -23,24 +23,25 @@ public class GetNoticeIntractorImpl implements MainContract.GetNoticeIntractor {
         GetNoticeDataService service = RetrofitInstance.getRetrofitInstance().create(GetNoticeDataService.class);
 
         /** Call the method with parameter in the interface to get the notice data*/
-        Call<NoticeList> call = service.getNoticeData(getloc().latitude,getloc().longitude);
+        if(currentLocation!=null) {
+            Call<NoticeList> call = service.getNoticeData(currentLocation.latitude, currentLocation.longitude);
 
-        /**Log the URL called*/
-        Log.wtf("URL Called", call.request().url() + "");
+            /**Log the URL called*/
+            Log.wtf("URL Called", call.request().url() + "");
 
-        call.enqueue(new Callback<NoticeList>() {
-            @Override
-            public void onResponse(Call<NoticeList> call, Response<NoticeList> response) {
-                onFinishedListener.onFinished(response.body().getNoticeArrayList());
+            call.enqueue(new Callback<NoticeList>() {
+                @Override
+                public void onResponse(Call<NoticeList> call, Response<NoticeList> response) {
+                    onFinishedListener.onFinished(response.body().getNoticeArrayList());
 
-            }
+                }
 
-            @Override
-            public void onFailure(Call<NoticeList> call, Throwable t) {
-                onFinishedListener.onFailure(t);
-            }
-        });
-
+                @Override
+                public void onFailure(Call<NoticeList> call, Throwable t) {
+                    onFinishedListener.onFailure(t);
+                }
+            });
+        }
     }
 
 }

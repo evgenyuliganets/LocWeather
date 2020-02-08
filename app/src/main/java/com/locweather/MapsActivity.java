@@ -12,11 +12,9 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -29,9 +27,7 @@ import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
@@ -60,16 +56,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private MainContract.presenter presenter;
     private GoogleMap mMap;
     private LatLng sydney;
-    private LocationCallback locationCallback;
     Button LocButton;
-    public static LatLng currentLocation = new LatLng(34, 40);
+    public static LatLng currentLocation;
     private FusedLocationProviderClient fusedLocationClient;
     private SupportMapFragment mapFragment;
     LatLng Point ;
-    Location Location;
+    private static Location Location;
     Geocoder geo;
     List<Address> addresses;
-    public static String adress;
+    private static String address;
+    private static String addressMap;
     private GoogleApiClient googleApiClient;
     final static int REQUEST_LOCATION = 199;
     @TargetApi(Build.VERSION_CODES.M)
@@ -82,7 +78,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         initProgressBar();
-
+        presenter = new MainPresenterImpl(this, new GetNoticeIntractorImpl());
+        presenter.requestDataFromServer();
 
         presenter = new MainPresenterImpl(this, new GetNoticeIntractorImpl());
         presenter.requestDataFromServer();
@@ -103,19 +100,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     }
                 });
-        locationCallback = new LocationCallback() {
-            public void onLocationResult(LocationResult locationResult) {
-                if (locationResult == null) {
-                    return;
-                }
-                for (Location location : locationResult.getLocations()) {
-                    if (location != null) {
-                        Location = location;
-                    }
-                }
-            }
-
-        };
     }
     private void setupAutoCompleteFragment() {
         PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment)
@@ -165,21 +149,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                             Point = new LatLng(Location.getLatitude(), Location.getLongitude());
                                             try {
                                                 addresses= geo.getFromLocation(Location.getLatitude(),Location.getLongitude(),1);
-                                                adress=addresses.get(0).getAddressLine(0);
+                                                address=addresses.get(0).getAddressLine(0);
                                             } catch (IOException e) {
-                                                e.printStackTrace();
+                                                if (address==null){ address="UnknownLocation";
+                                                    Toast.makeText(MapsActivity.this, "Cant take address, please turn on network", Toast.LENGTH_SHORT).show(); }
                                             }
-                                            mMap.addMarker(new MarkerOptions()
+                                            showProgress();
+                                             mMap.addMarker(new MarkerOptions()
                                                     .position(Point)
-                                                    .title(adress)
+                                                    .title(address)
                                                     .snippet("By GPS")
                                                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
                                             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(Point, 5.5f));
-                                            currentLocation=Point;
-                                            setLoc(currentLocation);
-                                            if (fusedLocationClient != null) {
-                                                fusedLocationClient.removeLocationUpdates(locationCallback);
-                                            }
+                                            setLoc(currentLocation=Point);
+                                            presenter.onRefreshButtonClick();
                                         }
                                         else {
                                             Toast.makeText(MapsActivity.this, "Cant take location right now, please reload App and turn on gps", Toast.LENGTH_SHORT).show();
@@ -189,22 +172,22 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                     else  {
                                         Point = new LatLng(location.getLatitude(), location.getLongitude());
                                         try {
+
                                             addresses= geo.getFromLocation(location.getLatitude(),location.getLongitude(),1);
-                                            adress=addresses.get(0).getAddressLine(0);
+                                            address=addresses.get(0).getAddressLine(0);
                                         } catch (IOException e) {
-                                            e.printStackTrace();
+                                            if (address==null){ address="UnknownLocation";
+                                                Toast.makeText(MapsActivity.this, "Cant take address,please turn on network", Toast.LENGTH_SHORT).show(); }
                                         }
+                                        showProgress();
                                         mMap.addMarker(new MarkerOptions()
                                                 .position(Point)
-                                                .title(adress)
+                                                .title(address)
                                                 .snippet("By GPS")
                                                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
                                         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(Point, 5.5f));
-                                        currentLocation=Point;
-                                        setLoc(currentLocation);
-                                        if (fusedLocationClient != null) {
-                                            fusedLocationClient.removeLocationUpdates(locationCallback);
-                                        }
+                                        setLoc(currentLocation=Point);
+                                        presenter.onRefreshButtonClick();
                                     }
                        }     });
                 }
@@ -219,34 +202,40 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 ArrayList<LatLng> allPoints = new ArrayList<>();
                 allPoints.add(point);
                 try {
+                    showProgress();
                     addresses= geo.getFromLocation(point.latitude ,point.longitude,1);
-                    adress=addresses.get(0).getAddressLine(0);
+                    addressMap=addresses.get(0).getAddressLine(0);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    if (addressMap==null){ addressMap="UnknownLocation";
+                        Toast.makeText(MapsActivity.this, "Cant take address,please turn on network", Toast.LENGTH_SHORT).show(); }
                 }
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(point, 5.5f));
                 mMap.clear();
                 mMap.addMarker(new MarkerOptions().position(point)
-                        .title(adress)
+                        .title(addressMap)
                         .snippet("OnClick"));
-                currentLocation=point;
-                setLoc(currentLocation);
+                setLoc(point);
+                presenter.onRefreshButtonClick();
             }
+
         });
         if (sydney!=null) {
             try {
                 addresses = geo.getFromLocation(sydney.latitude, sydney.longitude, 1);
-                adress = addresses.get(0).getAddressLine(0);
+                addressMap = addresses.get(0).getAddressLine(0);
             } catch (IOException e) {
-                e.printStackTrace();
+                if (addressMap==null){ addressMap="UnknownLocation";
+                    Toast.makeText(MapsActivity.this, "Cant take address,please turn on network", Toast.LENGTH_SHORT).show(); }
             }
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(sydney, 5.5f));
+            mMap.clear();
             mMap.addMarker(new MarkerOptions()
                     .position(sydney)
-                    .title(adress)
+                    .title(addressMap)
                     .snippet("By Search")
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
-            currentLocation=sydney;
-            setLoc(currentLocation);
+            setLoc(sydney);
+            presenter.onRefreshButtonClick();
         }
 
     }
@@ -336,15 +325,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         progressBar = new ProgressBar(this, null, android.R.attr.progressBarStyleLarge);
         progressBar.setIndeterminate(true);
 
-        RelativeLayout relativeLayout = new RelativeLayout(this);
-        relativeLayout.setGravity(Gravity.CENTER);
-        relativeLayout.addView(progressBar);
-
-        RelativeLayout.LayoutParams params = new
-                RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
-        progressBar.setVisibility(View.INVISIBLE);
-
-        this.addContentView(relativeLayout, params);
     }
 
     /**
@@ -369,7 +349,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     public void setLoc(LatLng loc){
-       currentLocation=loc;
+        currentLocation=loc;
     }
     @Override
     protected void onDestroy() {
