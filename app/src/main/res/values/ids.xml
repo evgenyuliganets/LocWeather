@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <item name="textView" type="id" />
+    <item name="txt_notice_title" type="id" />
+    <item name="txt_notice_brief" type="id" />
+    <item name="txt_notice_file_path" type="id" />
 </resources>

@@ -5,13 +5,18 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.IntentSender;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -43,23 +48,28 @@ import com.google.android.libraries.places.compat.Place;
 import com.google.android.libraries.places.compat.ui.PlaceAutocompleteFragment;
 import com.google.android.libraries.places.compat.ui.PlaceSelectionListener;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback,MainContract.MainView {
+    private ProgressBar progressBar;
+    private MainContract.presenter presenter;
     private GoogleMap mMap;
-    private LatLng sydney = new LatLng(-8.579892, 116.095239);
-    private static final String TAG = "MainActivity";
-    private final int REQUEST_LOCATION_PERMISSION = 1;
-    private final int REQUEST_COARSE_LOCATION_PERMISSION = 1;
-    private LocationRequest locationRequest;
+    private LatLng sydney;
     private LocationCallback locationCallback;
     Button LocButton;
+    public static LatLng currentLocation = new LatLng(34, 40);
     private FusedLocationProviderClient fusedLocationClient;
     private SupportMapFragment mapFragment;
     LatLng Point ;
     Location Location;
+    Geocoder geo;
+    List<Address> addresses;
+    public static String adress;
     private GoogleApiClient googleApiClient;
     final static int REQUEST_LOCATION = 199;
     @TargetApi(Build.VERSION_CODES.M)
@@ -71,23 +81,28 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        initProgressBar();
+
+
+        presenter = new MainPresenterImpl(this, new GetNoticeIntractorImpl());
+        presenter.requestDataFromServer();
+        geo = new Geocoder(this, Locale.ENGLISH);
         setupAutoCompleteFragment();
         requestLocationPermission();
-
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        locationRequest = LocationRequest.create();
+        LocationRequest locationRequest = LocationRequest.create();
         locationRequest.setInterval(20 * 1000);
         fusedLocationClient.getLastLocation()
                 .addOnSuccessListener(MapsActivity.this, new OnSuccessListener<Location>() {
-                            @SuppressLint("MissingPermission")
-                            public void onSuccess(final Location location) {
-                                // Got last known location. In some rare situations this can be null.
-                                if (location != null) {
-                                    Location = location;
-                                    }
+                    @SuppressLint("MissingPermission")
+                    public void onSuccess(final Location location) {
+                        // Got last known location. In some rare situations this can be null.
+                        if (location != null) {
+                            Location = location;
+                        }
 
-                            }
-                        });
+                    }
+                });
         locationCallback = new LocationCallback() {
             public void onLocationResult(LocationResult locationResult) {
                 if (locationResult == null) {
@@ -148,12 +163,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                     if (location == null) {
                                         if (Location != null) {
                                             Point = new LatLng(Location.getLatitude(), Location.getLongitude());
+                                            try {
+                                                addresses= geo.getFromLocation(Location.getLatitude(),Location.getLongitude(),1);
+                                                adress=addresses.get(0).getAddressLine(0);
+                                            } catch (IOException e) {
+                                                e.printStackTrace();
+                                            }
                                             mMap.addMarker(new MarkerOptions()
                                                     .position(Point)
-                                                    .title("Ur location")
+                                                    .title(adress)
                                                     .snippet("By GPS")
                                                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
                                             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(Point, 5.5f));
+                                            currentLocation=Point;
+                                            setLoc(currentLocation);
                                             if (fusedLocationClient != null) {
                                                 fusedLocationClient.removeLocationUpdates(locationCallback);
                                             }
@@ -164,14 +187,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                                     }
                                     else  {
-
                                         Point = new LatLng(location.getLatitude(), location.getLongitude());
+                                        try {
+                                            addresses= geo.getFromLocation(location.getLatitude(),location.getLongitude(),1);
+                                            adress=addresses.get(0).getAddressLine(0);
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
                                         mMap.addMarker(new MarkerOptions()
                                                 .position(Point)
-                                                .title("Ur location")
+                                                .title(adress)
                                                 .snippet("By GPS")
                                                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
                                         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(Point, 5.5f));
+                                        currentLocation=Point;
+                                        setLoc(currentLocation);
                                         if (fusedLocationClient != null) {
                                             fusedLocationClient.removeLocationUpdates(locationCallback);
                                         }
@@ -188,18 +218,36 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onMapClick(LatLng point) {
                 ArrayList<LatLng> allPoints = new ArrayList<>();
                 allPoints.add(point);
+                try {
+                    addresses= geo.getFromLocation(point.latitude ,point.longitude,1);
+                    adress=addresses.get(0).getAddressLine(0);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(point, 5.5f));
                 mMap.clear();
                 mMap.addMarker(new MarkerOptions().position(point)
-                        .title("Ur location")
+                        .title(adress)
                         .snippet("OnClick"));
+                currentLocation=point;
+                setLoc(currentLocation);
             }
         });
-        mMap.addMarker(new MarkerOptions()
-                .position(sydney)
-                .title("Ur location")
-                .snippet("By Search")
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+        if (sydney!=null) {
+            try {
+                addresses = geo.getFromLocation(sydney.latitude, sydney.longitude, 1);
+                adress = addresses.get(0).getAddressLine(0);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            mMap.addMarker(new MarkerOptions()
+                    .position(sydney)
+                    .title(adress)
+                    .snippet("By Search")
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+            currentLocation=sydney;
+            setLoc(currentLocation);
+        }
 
     }
     @Override
@@ -216,6 +264,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         String[] perms = {Manifest.permission.ACCESS_FINE_LOCATION};
         if (!EasyPermissions.hasPermissions(this, perms)) {
 
+            int REQUEST_LOCATION_PERMISSION = 1;
             EasyPermissions.requestPermissions(this, "Please grant the location permission", REQUEST_LOCATION_PERMISSION, perms);
         }
 
@@ -226,6 +275,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (!EasyPermissions.hasPermissions(this, perms)) {
 
 
+            int REQUEST_COARSE_LOCATION_PERMISSION = 1;
             EasyPermissions.requestPermissions(this, "Please grant the location permission", REQUEST_COARSE_LOCATION_PERMISSION, perms);
         }
 
@@ -271,8 +321,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     final Status status = result.getStatus();
                     if (status.getStatusCode() == LocationSettingsStatusCodes.RESOLUTION_REQUIRED) {
                         try {
-                            // Show the dialog by calling startResolutionForResult(),
-                            // and check the result in onActivityResult().
                             status.startResolutionForResult(MapsActivity.this, REQUEST_LOCATION);
                         } catch (IntentSender.SendIntentException e) {
                             // Ignore the error.
@@ -283,5 +331,52 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
     }
+
+    private void initProgressBar() {
+        progressBar = new ProgressBar(this, null, android.R.attr.progressBarStyleLarge);
+        progressBar.setIndeterminate(true);
+
+        RelativeLayout relativeLayout = new RelativeLayout(this);
+        relativeLayout.setGravity(Gravity.CENTER);
+        relativeLayout.addView(progressBar);
+
+        RelativeLayout.LayoutParams params = new
+                RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
+        progressBar.setVisibility(View.INVISIBLE);
+
+        this.addContentView(relativeLayout, params);
+    }
+
+    /**
+     * RecyclerItem click event listener
+     * */
+
+    @Override
+    public void showProgress() {
+        progressBar.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void hideProgress() {
+        progressBar.setVisibility(View.INVISIBLE);
+    }
+
+    @Override
+    public void onResponseFailure(Throwable throwable) {
+        Toast.makeText(MapsActivity.this,
+                "Something went wrong...Error message: " + throwable.getMessage(),
+                Toast.LENGTH_LONG).show();
+    }
+
+    public void setLoc(LatLng loc){
+       currentLocation=loc;
+    }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        presenter.onDestroy();
+    }
+
+
 
 }
