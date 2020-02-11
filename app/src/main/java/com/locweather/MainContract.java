@@ -32,6 +32,7 @@ public interface MainContract {
 
         void onResponseFailure(Throwable throwable);
 
+        void setDataList(ArrayList<Notice> noticeArrayList);
     }
 
     /**

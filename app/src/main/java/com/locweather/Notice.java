@@ -3,31 +3,25 @@ package com.locweather;
 import com.google.gson.annotations.SerializedName;
 
 public class Notice {
-    @SerializedName("lat")
-    private Double lat;
-    @SerializedName("lon")
-    private Double lon;
+
+    @SerializedName("description")
+    private String weather;
 
 
-    public Notice(Double lat, Double lon) {
-        this.lat = lat;
-        this.lon = lon;
+    public Notice( String weather) {
+
+        this.weather = weather;
+
 
     }
 
-    public Double getlat() {
-        return lat;
+    public String getWeather() {
+        return weather;
     }
 
-    public void setlat(Double lat) {
-        this.lat = lat;
+    public void setWeather(String weather) {
+        this.weather = weather;
     }
 
-    public Double getlon() {
-        return lon;
-    }
 
-    public void setlan(Double lon) {
-        this.lon = lon;
-    }
 }

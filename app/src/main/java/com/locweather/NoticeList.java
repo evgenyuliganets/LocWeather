@@ -5,10 +5,11 @@ import com.google.gson.annotations.SerializedName;
 import java.util.ArrayList;
 public class NoticeList {
 
-    @SerializedName("notice_list")
+    @SerializedName("weather")
     private ArrayList<Notice> noticeList;
 
-    public ArrayList<Notice> getNoticeArrayList() {
+
+    public  ArrayList<Notice> getNoticeArrayList() {
         return noticeList;
     }
 

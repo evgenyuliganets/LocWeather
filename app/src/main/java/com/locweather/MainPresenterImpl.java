@@ -38,6 +38,7 @@ public class MainPresenterImpl implements MainContract.presenter, MainContract.G
     @Override
     public void onFinished(ArrayList<Notice> noticeArrayList) {
         if(mainView != null){
+            mainView.setDataList(noticeArrayList);
             mainView.hideProgress();
         }
     }
