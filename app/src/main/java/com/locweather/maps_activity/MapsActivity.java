@@ -1,4 +1,4 @@
-package com.locweather;
+package com.locweather.maps_activity;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -12,14 +12,21 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -43,6 +50,9 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.libraries.places.compat.Place;
 import com.google.android.libraries.places.compat.ui.PlaceAutocompleteFragment;
 import com.google.android.libraries.places.compat.ui.PlaceSelectionListener;
+import com.locweather.R;
+import com.locweather.adapter.NoticeAdapter;
+import com.locweather.model.Notice;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -51,37 +61,36 @@ import java.util.Locale;
 
 import pub.devrel.easypermissions.EasyPermissions;
 
-import static android.icu.lang.UCharacter.toUpperCase;
-
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, MainContract.MainView {
     private ProgressBar progressBar;
     private MainContract.presenter presenter;
     private GoogleMap mMap;
-    private LatLng sydney;
-    Button LocButton;
-    public static LatLng currentLocation = new LatLng(40 ,40);
+    private LatLng beginPoint=new LatLng(48.61667, 22.3);
+    Button locButton;
+    public static LatLng currentLocation = new LatLng(48.61667, 22.3);
     private FusedLocationProviderClient fusedLocationClient;
     private SupportMapFragment mapFragment;
     LatLng Point;
     private static Location Location;
     Geocoder geo;
     List<Address> addresses;
-    private static String address;
+    public static String address;
     private static String addressMap;
     private GoogleApiClient googleApiClient;
     final static int REQUEST_LOCATION = 199;
-    public String weather;
-    public NoticeAdapter adapter;
+    private RecyclerView recyclerView;
 
+    @SuppressLint("MissingPermission")
     @TargetApi(Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
-        LocButton = findViewById(R.id.button);
+        locButton = findViewById(R.id.button);
         mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
+        assert mapFragment != null;
         mapFragment.getMapAsync(this);
 
         geo = new Geocoder(this, Locale.ENGLISH);
@@ -109,7 +118,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(Place place) {
-                sydney = place.getLatLng();
+                beginPoint = place.getLatLng();
                 mapFragment.getMapAsync(MapsActivity.this);
             }
 
@@ -127,14 +136,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        initializeToolbarAndRecyclerView();
         initProgressBar();
         presenter = new MainPresenterImpl(this, new GetNoticeIntractorImpl());
-        presenter.requestDataFromServer();
         setLoc(currentLocation);
-        LocButton.setOnClickListener(new View.OnClickListener() {
-            @SuppressLint("MissingPermission")
+        presenter.requestDataFromServer();
+        locButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-
                 requestLocationPermission();
                 requestCoarseLocationPermission();
                 final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -145,11 +153,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     fusedLocationClient = LocationServices.getFusedLocationProviderClient(MapsActivity.this);
                     fusedLocationClient.getLastLocation()
                             .addOnSuccessListener(MapsActivity.this, new OnSuccessListener<Location>() {
+                                @TargetApi(Build.VERSION_CODES.N)
                                 @SuppressLint("MissingPermission")
                                 public void onSuccess(final Location location) {
                                     if (location == null) {
                                         if (Location != null) {
                                             Point = new LatLng(Location.getLatitude(), Location.getLongitude());
+                                            setLoc(currentLocation = Point);
+                                            presenter.requestDataFromServer();
                                             try {
                                                 addresses = geo.getFromLocation(Location.getLatitude(), Location.getLongitude(), 1);
                                                 address = addresses.get(0).getAddressLine(0);
@@ -159,9 +170,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                                     Toast.makeText(MapsActivity.this, "Cant take address, please turn on network", Toast.LENGTH_SHORT).show();
                                                 }
                                             }
-                                            setLoc(currentLocation = Point);
-                                            presenter.requestDataFromServer();
-                                            presenter.onRefreshButtonClick();
+                                            mMap.clear();
                                             mMap.addMarker(new MarkerOptions()
                                                     .position(Point)
                                                     .title(address)
@@ -174,6 +183,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                                     } else {
                                         Point = new LatLng(location.getLatitude(), location.getLongitude());
+                                        setLoc(currentLocation = Point);
+                                        presenter.requestDataFromServer();
                                         try {
                                             addresses = geo.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
                                             address = addresses.get(0).getAddressLine(0);
@@ -183,16 +194,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                                 Toast.makeText(MapsActivity.this, "Cant take address,please turn on network", Toast.LENGTH_SHORT).show();
                                             }
                                         }
-                                        setLoc(currentLocation = Point);
-                                        presenter.requestDataFromServer();
-                                        if (weather==null){
-
-                                            weather = "Cant get data";
-                                        }
+                                        mMap.clear();
                                         mMap.addMarker(new MarkerOptions()
                                                 .position(Point)
                                                 .title(address)
-                                                .snippet(toUpperCase(weather))
+                                                .snippet("By GPS")
                                                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
                                         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(Point, 5.5f));
                                     }
@@ -206,8 +212,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng point) {
-                ArrayList<LatLng> allPoints = new ArrayList<>();
-                allPoints.add(point);
+                /*If need multiply markers
+                 ArrayList<LatLng> allPoints = new ArrayList<>();
+                 allPoints.add(point);*/
                 setLoc(point);
                 presenter.requestDataFromServer();
                 try {
@@ -220,21 +227,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         Toast.makeText(MapsActivity.this, "Cant take address,please turn on network", Toast.LENGTH_SHORT).show();
                     }
                 }
-                if (weather==null){
-
-                    weather = "Cant get data";
-                }
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(point, 5.5f));
                 mMap.clear();
                 mMap.addMarker(new MarkerOptions().position(point)
                         .title(addressMap)
-                        .snippet(weather));
-            }
-
-        });
-        if (sydney != null) {
+                        .snippet("OnClick"));
+            }});
+        if (beginPoint != null) {
             try {
-                addresses = geo.getFromLocation(sydney.latitude, sydney.longitude, 1);
+                addresses = geo.getFromLocation(beginPoint.latitude, beginPoint.longitude, 1);
                 addressMap = addresses.get(0).getAddressLine(0);
             } catch (IOException e) {
                 if (addressMap == null) {
@@ -242,20 +243,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     Toast.makeText(MapsActivity.this, "Cant take address,please turn on network", Toast.LENGTH_SHORT).show();
                 }
             }
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(sydney, 5.5f));
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(beginPoint, 5.5f));
             mMap.clear();
             mMap.addMarker(new MarkerOptions()
-                    .position(sydney)
+                    .position(beginPoint)
                     .title(addressMap)
                     .snippet("By Search")
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
-            setLoc(sydney);
         }
 
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         // Forward results to EasyPermissions
@@ -303,7 +303,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     })
                     .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
                         @Override
-                        public void onConnectionFailed(ConnectionResult connectionResult) {
+                        public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
                             Log.d("Location error", "Location error " + connectionResult.getErrorCode());
                         }
@@ -338,24 +338,71 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
+    private void initializeToolbarAndRecyclerView() {
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        recyclerView = findViewById(R.id.recycler_view_employee_list);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(MapsActivity.this);
+        recyclerView.setLayoutManager(layoutManager);
+
+
+    }
+
+
+    /**
+     * Initializing progressbar programmatically
+     * */
     private void initProgressBar() {
         progressBar = new ProgressBar(this, null, android.R.attr.progressBarStyleLarge);
         progressBar.setIndeterminate(true);
 
+        RelativeLayout relativeLayout = new RelativeLayout(this);
+        relativeLayout.setGravity(Gravity.CENTER);
+        relativeLayout.addView(progressBar);
+
+        RelativeLayout.LayoutParams params = new
+                RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
+        progressBar.setVisibility(View.INVISIBLE);
+
+        this.addContentView(relativeLayout, params);
     }
+
 
     /**
      * RecyclerItem click event listener
-     */
+     * */
+    private RecyclerItemClickListener recyclerItemClickListener = new RecyclerItemClickListener() {
+        @Override
+        public void onItemClick(Notice notice) {
+
+            Toast.makeText(MapsActivity.this,
+                    "List title:  " + notice.getWeather(),
+                    Toast.LENGTH_LONG).show();
+
+        }
+    };
+
 
     @Override
     public void showProgress() {
         progressBar.setVisibility(View.VISIBLE);
     }
 
+
     @Override
     public void hideProgress() {
         progressBar.setVisibility(View.INVISIBLE);
+    }
+
+
+    @Override
+    public void setDataToRecyclerView(ArrayList<Notice> noticeArrayList) {
+
+        NoticeAdapter adapter = new NoticeAdapter(noticeArrayList , recyclerItemClickListener);
+        recyclerView.setAdapter(adapter);
+
     }
 
     @Override
@@ -365,22 +412,41 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Toast.LENGTH_LONG).show();
     }
 
-    @Override
-    public void setDataList(ArrayList<Notice> noticeArrayList) {
-        weather= noticeArrayList.get(0).getWeather();
-
-    }
-
-
-    public void setLoc(LatLng loc) {
-        currentLocation = loc;
-    }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         presenter.onDestroy();
     }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_refresh) {
+            presenter.onRefreshButtonClick();
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    public void setLoc(LatLng loc) {
+        currentLocation = loc;
+    }
+
 
 
 }

@@ -1,15 +1,17 @@
-package com.locweather;
-
+package com.locweather.maps_activity;
 
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.locweather.main_interface.GetNoticeDataService;
+import com.locweather.model.NoticeList;
+import com.locweather.network.RetrofitInstance;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static com.locweather.MapsActivity.currentLocation;
+import static com.locweather.maps_activity.MapsActivity.currentLocation;
 
 public class GetNoticeIntractorImpl implements MainContract.GetNoticeIntractor {
     public LatLng getloc(){

@@ -1,6 +1,7 @@
+package com.locweather.maps_activity;
 
-package com.locweather;
 
+import com.locweather.model.Notice;
 
 import java.util.ArrayList;
 
@@ -29,10 +30,10 @@ public interface MainContract {
 
         void hideProgress();
 
+        void setDataToRecyclerView(ArrayList<Notice> noticeArrayList);
 
         void onResponseFailure(Throwable throwable);
 
-        void setDataList(ArrayList<Notice> noticeArrayList);
     }
 
     /**

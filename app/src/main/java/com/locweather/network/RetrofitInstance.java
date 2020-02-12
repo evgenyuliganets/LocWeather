@@ -1,4 +1,4 @@
-package com.locweather;
+package com.locweather.network;
 
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;

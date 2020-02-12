@@ -1,4 +1,7 @@
-package com.locweather;
+package com.locweather.maps_activity;
+
+
+import com.locweather.model.Notice;
 
 import java.util.ArrayList;
 
@@ -38,11 +41,10 @@ public class MainPresenterImpl implements MainContract.presenter, MainContract.G
     @Override
     public void onFinished(ArrayList<Notice> noticeArrayList) {
         if(mainView != null){
-            mainView.setDataList(noticeArrayList);
+            mainView.setDataToRecyclerView(noticeArrayList);
             mainView.hideProgress();
         }
     }
-
 
     @Override
     public void onFailure(Throwable t) {
