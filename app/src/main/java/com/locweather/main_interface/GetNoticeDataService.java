@@ -11,4 +11,5 @@ public interface GetNoticeDataService {
 
     @GET("weather?appid=0194877ecdcac230396a119c01d46100")
     Call<NoticeList> getNoticeData(@Query("lat") double lat , @Query("lon") double lon );
+
 }

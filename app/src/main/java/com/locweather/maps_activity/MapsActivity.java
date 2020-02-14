@@ -52,6 +52,7 @@ import com.google.android.libraries.places.compat.ui.PlaceAutocompleteFragment;
 import com.google.android.libraries.places.compat.ui.PlaceSelectionListener;
 import com.locweather.R;
 import com.locweather.adapter.NoticeAdapter;
+import com.locweather.model.Main;
 import com.locweather.model.Notice;
 
 import java.io.IOException;
@@ -142,6 +143,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         setLoc(currentLocation);
         presenter.requestDataFromServer();
         locButton.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("MissingPermission")
             public void onClick(View v) {
                 requestLocationPermission();
                 requestCoarseLocationPermission();
@@ -398,9 +400,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
     @Override
-    public void setDataToRecyclerView(ArrayList<Notice> noticeArrayList) {
+    public void setDataToRecyclerView(ArrayList<Notice> noticeArrayList, Main main) {
 
-        NoticeAdapter adapter = new NoticeAdapter(noticeArrayList , recyclerItemClickListener);
+        NoticeAdapter adapter = new NoticeAdapter(noticeArrayList, main , recyclerItemClickListener);
         recyclerView.setAdapter(adapter);
 
     }

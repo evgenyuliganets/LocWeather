@@ -1,12 +1,11 @@
 package com.locweather.maps_activity;
 
-
+import com.locweather.model.Main;
 import com.locweather.model.Notice;
 
 import java.util.ArrayList;
 
 public interface MainContract {
-
     /**
      * Call when user interact with the view and other when view OnDestroy()
      * */
@@ -30,7 +29,7 @@ public interface MainContract {
 
         void hideProgress();
 
-        void setDataToRecyclerView(ArrayList<Notice> noticeArrayList);
+        void setDataToRecyclerView(ArrayList<Notice> noticeArrayList, Main main);
 
         void onResponseFailure(Throwable throwable);
 
@@ -42,10 +41,10 @@ public interface MainContract {
     interface GetNoticeIntractor {
 
         interface OnFinishedListener {
-            void onFinished(ArrayList<Notice> noticeArrayList);
+            void onFinished(ArrayList<Notice> noticeArrayList, Main main);
             void onFailure(Throwable t);
         }
-
         void getNoticeArrayList(OnFinishedListener onFinishedListener);
+
     }
 }

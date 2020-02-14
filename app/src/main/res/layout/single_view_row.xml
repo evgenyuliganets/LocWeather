@@ -1,41 +1,115 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:orientation="horizontal"
     card_view:cardCornerRadius="6dp"
     card_view:cardElevation="3dp"
     card_view:cardUseCompatPadding="true">
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="85dp"
+        android:layout_height="92dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/txt_notice_temp_main"
+            android:layout_width="85dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="55dp"
+            android:layout_height="55dp"
+            android:layout_gravity="center|left"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/quantum_ic_cloud_off_vd_theme_24"
+            android:contentDescription="@string/todo" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="279dp"
         android:layout_height="wrap_content"
+        android:layout_gravity="end"
         android:layout_margin="5dp"
         android:orientation="vertical"
         android:padding="5dp">
 
         <!-- Text Notice Name -->
-        <TextView
-            android:id="@+id/txt_notice_title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="3dp"
-            android:textStyle="bold" />
+
+        <TableRow
+            android:layout_width="270dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="end">
+
+            <TextView
+                android:id="@+id/txt_notice_weather"
+                android:layout_width="135dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:padding="3dp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/txt_notice_temp"
+                android:layout_width="135dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:padding="3dp"
+                android:textStyle="bold" />
+        </TableRow>
 
         <!-- Text Notice Description -->
-        <TextView
-            android:id="@+id/txt_notice_brief"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="3dp" />
+
+        <TableRow
+            android:layout_width="270dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="end">
+
+            <TextView
+                android:id="@+id/txt_notice_humidity"
+                android:layout_width="135dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:padding="3dp" />
+
+            <TextView
+                android:id="@+id/txt_notice_pressure"
+                android:layout_width="141dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:padding="3dp" />
+
+        </TableRow>
+
+        <TableRow
+            android:layout_width="270dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="end">
+
+            <TextView
+                android:id="@+id/txt_notice_wind"
+                android:layout_width="135dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:padding="3dp"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/txt_notice_add"
+                android:layout_width="135dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:padding="3dp"
+                android:textSize="12sp" />
+        </TableRow>
 
         <!-- Text Notice FilePath -->
-        <TextView
-            android:id="@+id/txt_notice_file_path"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="3dp"
-            android:textSize="12sp" />
 
     </LinearLayout>
 

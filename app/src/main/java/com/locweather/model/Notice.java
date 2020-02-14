@@ -4,15 +4,14 @@ import com.google.gson.annotations.SerializedName;
 
 public class Notice {
 
-    @SerializedName("description")
+    @SerializedName("main")
     private String weather;
-
-
-    public Notice( String weather) {
+    @SerializedName("description")
+    private String info;
+    public Notice( String weather,String info) {
 
         this.weather = weather;
-
-
+        this.info = info;
     }
 
     public String getWeather() {
@@ -23,5 +22,11 @@ public class Notice {
         this.weather = weather;
     }
 
+    public String getInfo() {
+        return info;
+    }
 
+    public void setTemp(String info) {
+        this.info = info;
+    }
 }

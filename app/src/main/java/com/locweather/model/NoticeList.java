@@ -1,5 +1,6 @@
 package com.locweather.model;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
@@ -15,16 +16,16 @@ public class NoticeList {
     public void setNoticeArrayList(ArrayList<Notice> noticeArrayList) {
         this.noticeList = noticeArrayList;
     }
-    private static final String TAG = "NoticeList";
-    @SerializedName("temp")
-    private ArrayList<Notice> tempList;
+    @SerializedName("main")
+    @Expose
+    private Main main;
 
-
-    public  ArrayList<Notice> getTempList() {
-        return tempList;
+    public Main getMain() {
+        return main;
     }
 
-    public void setTempList(ArrayList<Notice> tempArrayList) {
-        this.tempList = tempArrayList;
+    public void setMain(Main main) {
+        this.main = main;
     }
+
 }

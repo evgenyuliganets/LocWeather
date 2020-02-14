@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">LocWeather</string>
     <string name="title_activity_maps">Map</string>
@@ -7,4 +8,7 @@
     <string name="ok" />
     <string name="hint_search" />
     <string name="action_refresh" />
+    <string name="temp">Temperature: </string>
+    <string name="wind">Wind: </string>
+    <string name="todo">TODO</string>
 </resources>
