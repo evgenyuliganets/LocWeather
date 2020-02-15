@@ -2,6 +2,7 @@ package com.locweather.maps_activity;
 
 import com.locweather.model.Main;
 import com.locweather.model.Notice;
+import com.locweather.model.Wind;
 
 import java.util.ArrayList;
 
@@ -29,7 +30,7 @@ public interface MainContract {
 
         void hideProgress();
 
-        void setDataToRecyclerView(ArrayList<Notice> noticeArrayList, Main main);
+        void setDataToRecyclerView(ArrayList<Notice> noticeArrayList, Main main, Wind wind);
 
         void onResponseFailure(Throwable throwable);
 
@@ -41,7 +42,7 @@ public interface MainContract {
     interface GetNoticeIntractor {
 
         interface OnFinishedListener {
-            void onFinished(ArrayList<Notice> noticeArrayList, Main main);
+            void onFinished(ArrayList<Notice> noticeArrayList, Main main, Wind wind);
             void onFailure(Throwable t);
         }
         void getNoticeArrayList(OnFinishedListener onFinishedListener);

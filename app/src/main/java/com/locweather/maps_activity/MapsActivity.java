@@ -54,6 +54,7 @@ import com.locweather.R;
 import com.locweather.adapter.NoticeAdapter;
 import com.locweather.model.Main;
 import com.locweather.model.Notice;
+import com.locweather.model.Wind;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -77,13 +78,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     Geocoder geo;
     List<Address> addresses;
     public static String address;
-    private static String addressMap;
+    public static String addressMap;
     private GoogleApiClient googleApiClient;
     final static int REQUEST_LOCATION = 199;
     private RecyclerView recyclerView;
 
-    @SuppressLint("MissingPermission")
-    @TargetApi(Build.VERSION_CODES.M)
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -165,13 +165,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                             presenter.requestDataFromServer();
                                             try {
                                                 addresses = geo.getFromLocation(Location.getLatitude(), Location.getLongitude(), 1);
-                                                address = addresses.get(0).getAddressLine(0);
+                                                Address address1 = addresses.get(0);
+                                                address=address1.getCountryName();
+                                                if (address1.getAdminArea()!=null) {address=address1.getAdminArea()+", "+address;}
+                                                if (address1.getLocality()!=null) {address=address1.getLocality()+", "+address;}
                                             } catch (IOException e) {
-                                                if (address == null) {
+                                                if (address ==null || addresses==null) {
                                                     address = "UnknownLocation";
-                                                    Toast.makeText(MapsActivity.this, "Cant take address, please turn on network", Toast.LENGTH_SHORT).show();
-                                                }
+                                                    Toast.makeText(MapsActivity.this,"Cant take address,please check other location", Toast.LENGTH_SHORT).show();
+                                                }else{Toast.makeText(MapsActivity.this, "Cant take address,please turn on network", Toast.LENGTH_SHORT).show();}
+                                                address = "UnknownLocation";
                                             }
+                                            setAddressMap(address);
                                             mMap.clear();
                                             mMap.addMarker(new MarkerOptions()
                                                     .position(Point)
@@ -189,13 +194,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                         presenter.requestDataFromServer();
                                         try {
                                             addresses = geo.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-                                            address = addresses.get(0).getAddressLine(0);
+                                            Address address1 = addresses.get(0);
+                                            address=address1.getCountryName();
+                                            if (address1.getAdminArea()!=null) {address=address1.getAdminArea()+", "+address;}
+                                            if (address1.getLocality()!=null) {address=address1.getLocality()+", "+address;}
                                         } catch (IOException e) {
-                                            if (address == null) {
+                                            if (address ==null || addresses==null) {
                                                 address = "UnknownLocation";
-                                                Toast.makeText(MapsActivity.this, "Cant take address,please turn on network", Toast.LENGTH_SHORT).show();
-                                            }
+                                                Toast.makeText(MapsActivity.this,"Cant take address,please check other location", Toast.LENGTH_SHORT).show();
+                                            }else{Toast.makeText(MapsActivity.this, "Cant take address,please turn on network", Toast.LENGTH_SHORT).show();}
+                                            address = "UnknownLocation";
                                         }
+                                        setAddressMap(address);
                                         mMap.clear();
                                         mMap.addMarker(new MarkerOptions()
                                                 .position(Point)
@@ -217,34 +227,48 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 /*If need multiply markers
                  ArrayList<LatLng> allPoints = new ArrayList<>();
                  allPoints.add(point);*/
+                try {
                 setLoc(point);
                 presenter.requestDataFromServer();
                 try {
                     showProgress();
                     addresses = geo.getFromLocation(point.latitude, point.longitude, 1);
-                    addressMap = addresses.get(0).getAddressLine(0);
+                    Address address = addresses.get(0);
+                    addressMap=address.getCountryName();
+                    if (address.getAdminArea()!=null) {addressMap=address.getAdminArea()+", "+addressMap;}
+                    if (address.getLocality()!=null) {addressMap=address.getLocality()+", "+addressMap;}
+                    setAddressMap(addressMap);
                 } catch (IOException e) {
-                    if (addressMap == null) {
+                    if (addressMap ==null || addresses==null) {
                         addressMap = "UnknownLocation";
-                        Toast.makeText(MapsActivity.this, "Cant take address,please turn on network", Toast.LENGTH_SHORT).show();
-                    }
+                        Toast.makeText(MapsActivity.this,"Cant take address,please check other location", Toast.LENGTH_SHORT).show();
+                    }else{Toast.makeText(MapsActivity.this, "Cant take address,please turn on network", Toast.LENGTH_SHORT).show();}
+                    addressMap = "UnknownLocation";
                 }
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(point, 5.5f));
                 mMap.clear();
                 mMap.addMarker(new MarkerOptions().position(point)
                         .title(addressMap)
                         .snippet("OnClick"));
-            }});
+            }
+                catch (Exception e){Toast.makeText(MapsActivity.this, "Cant place marker,please check other location", Toast.LENGTH_SHORT).show();
+                    addressMap = "UnknownLocation";}}
+        });
         if (beginPoint != null) {
             try {
                 addresses = geo.getFromLocation(beginPoint.latitude, beginPoint.longitude, 1);
-                addressMap = addresses.get(0).getAddressLine(0);
+                Address address = addresses.get(0);
+                addressMap=address.getCountryName();
+                if (address.getAdminArea()!=null) {addressMap=address.getAdminArea()+", "+addressMap;}
+                if (address.getLocality()!=null) {addressMap=address.getLocality()+", "+addressMap;}
             } catch (IOException e) {
-                if (addressMap == null) {
+                if (addressMap ==null || addresses==null) {
                     addressMap = "UnknownLocation";
-                    Toast.makeText(MapsActivity.this, "Cant take address,please turn on network", Toast.LENGTH_SHORT).show();
-                }
+                    Toast.makeText(MapsActivity.this,"Cant take address,please check other location", Toast.LENGTH_SHORT).show();
+                }else{Toast.makeText(MapsActivity.this, "Cant take address,please turn on network", Toast.LENGTH_SHORT).show();}
+                addressMap = "UnknownLocation";
             }
+            setAddressMap(addressMap);
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(beginPoint, 5.5f));
             mMap.clear();
             mMap.addMarker(new MarkerOptions()
@@ -400,9 +424,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
     @Override
-    public void setDataToRecyclerView(ArrayList<Notice> noticeArrayList, Main main) {
+    public void setDataToRecyclerView(ArrayList<Notice> noticeArrayList, Main main, Wind wind) {
 
-        NoticeAdapter adapter = new NoticeAdapter(noticeArrayList, main , recyclerItemClickListener);
+        NoticeAdapter adapter = new NoticeAdapter(noticeArrayList, main ,wind, recyclerItemClickListener);
         recyclerView.setAdapter(adapter);
 
     }
@@ -420,7 +444,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onDestroy();
         presenter.onDestroy();
     }
-
+    public static void setAddressMap(String addressMap) {
+        MapsActivity.addressMap = addressMap;
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

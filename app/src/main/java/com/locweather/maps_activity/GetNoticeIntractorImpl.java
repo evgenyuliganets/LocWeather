@@ -34,7 +34,7 @@ public class GetNoticeIntractorImpl implements MainContract.GetNoticeIntractor {
             call.enqueue(new Callback<NoticeList>() {
                 @Override
                 public void onResponse(Call<NoticeList> call, Response<NoticeList> response) {
-                    onFinishedListener.onFinished(response.body().getNoticeArrayList(), response.body().getMain());
+                    onFinishedListener.onFinished(response.body().getNoticeArrayList(), response.body().getMain(), response.body().getWind());
 
                 }
 
