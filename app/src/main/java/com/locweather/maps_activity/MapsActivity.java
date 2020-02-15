@@ -22,7 +22,6 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -84,6 +83,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private RecyclerView recyclerView;
 
 
+    @SuppressLint("MissingPermission")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -132,7 +132,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
 
     public void onMapReady(GoogleMap googleMap) {

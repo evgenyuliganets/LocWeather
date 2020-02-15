@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout android:layout_width="match_parent"
-    android:layout_height="match_parent"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
@@ -20,32 +20,47 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <FrameLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="398dp"
+        android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <Button
-            android:id="@+id/button"
-            android:layout_width="50dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top|end"
-            android:backgroundTint="#03A9F4"
-            android:foreground="@android:drawable/ic_menu_mylocation" />
-
-        <fragment
-            android:id="@+id/map"
-            android:name="com.google.android.gms.maps.SupportMapFragment"
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_gravity="bottom">
 
-            tools:context=".MapsActivity" />
+            <Button
+                android:id="@+id/button"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|end"
+                android:backgroundTint="#03A9F4"
+                android:foreground="@android:drawable/ic_menu_mylocation" />
 
-    </FrameLayout>
+            <fragment
+                android:id="@+id/map"
+                android:name="com.google.android.gms.maps.SupportMapFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_view_employee_list"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+                tools:context=".MapsActivity" />
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="bottom">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycler_view_employee_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="115dp"
+                    android:layout_gravity="bottom"
+                    android:minHeight="105dp" />
+            </FrameLayout>
+
+        </FrameLayout>
+
+    </LinearLayout>
 
 </LinearLayout>

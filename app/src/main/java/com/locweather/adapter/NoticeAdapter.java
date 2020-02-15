@@ -1,9 +1,11 @@
 package com.locweather.adapter;
 
 import android.annotation.SuppressLint;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,11 +19,15 @@ import com.locweather.model.Wind;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 public class NoticeAdapter extends RecyclerView.Adapter<NoticeAdapter.EmployeeViewHolder> {
     private  Wind wind;
     private ArrayList<Notice> dataList;
     private Main main;
+    private Date currentTime = Calendar.getInstance().getTime();
+
     private RecyclerItemClickListener recyclerItemClickListener;
     public NoticeAdapter(ArrayList<Notice> dataList, Main main, Wind wind, RecyclerItemClickListener recyclerItemClickListener) {
         this.dataList = dataList;
@@ -43,10 +49,12 @@ public class NoticeAdapter extends RecyclerView.Adapter<NoticeAdapter.EmployeeVi
     @Override
     public void onBindViewHolder(EmployeeViewHolder holder, @SuppressLint("RecyclerView") final int position) {
         if(getAddressMap()!=null){holder.txtNoticeAddress.setText("Loc: "+getAddressMap());}else{holder.txtNoticeAddress.setText("Loc: Unknown location");}
-        holder.txtNoticeWind.setText("Wind: "+wind.getSpeed()+"m/s,"+arrow());
+        holder.imageIcon.setImageURI(Uri.parse("android.resource://com.locweather/drawable/i"+dataList.get(position).getIcon()));
+        holder.txtNoticeWind.setText("Wind: "+roundUp(+wind.getSpeed(),1)+"m/s, "+arrow());
         holder.txtNoticeTempMain.setText(roundUp(+main.getTemp(),1)+"°C");
         holder.txtNoticeWeather.setText(dataList.get(position).getWeather()+" : "+dataList.get(position).getInfo());
         holder.txtNoticeTemp.setText("Feels: "+roundUp(+main.getFeelsLike(),1)+"°C ");
+        holder.txtNoticeTime.setText(currentTime.toString());
         holder.txtNoticeHumidity.setText("Humidity: "+main.getHumidity()+"%");
         holder.txtNoticePressure.setText("Pressure: "+main.getPressure()+"hPa");
         holder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -67,11 +75,13 @@ public class NoticeAdapter extends RecyclerView.Adapter<NoticeAdapter.EmployeeVi
     }
 
     class EmployeeViewHolder extends RecyclerView.ViewHolder {
-
-        TextView txtNoticeWeather, txtNoticeTempMain,txtNoticeTemp, txtNoticeHumidity,txtNoticeAddress,txtNoticePressure,txtNoticeWind;
+        ImageView imageIcon;
+        TextView txtNoticeWeather, txtNoticeTempMain,txtNoticeTemp, txtNoticeHumidity,txtNoticeAddress,txtNoticePressure,txtNoticeWind,txtNoticeTime;
 
         EmployeeViewHolder(View itemView) {
             super(itemView);
+            imageIcon=itemView.findViewById(R.id.image_icon);
+            txtNoticeTime= itemView.findViewById(R.id.txt_time);
             txtNoticeWind= itemView.findViewById(R.id.txt_notice_wind);
             txtNoticeAddress=  itemView.findViewById(R.id.txt_notice_title);
             txtNoticeWeather =  itemView.findViewById(R.id.txt_notice_weather);
@@ -98,24 +108,15 @@ public class NoticeAdapter extends RecyclerView.Adapter<NoticeAdapter.EmployeeVi
             else if (st == 270) switchy = 3;
             else if (st == 360) switchy = 0;
             switch (switchy) {
-                case 4:
-                    return "NE⇗";
-                case 5:
-                    return "SE⇘";
-                case 6:
-                    return "SW⇙";
-                case 7:
-                    return "NW⇖";
-                case 0:
-                    return "N⇑";
-                case 1:
-                    return "E⇒";
-                case 2:
-                    return "S⇓";
-                case 3:
-                    return "W⇐";
-                default:
-                    return "Error";
+                case 4: return "NE⇗";
+                case 5: return "SE⇘";
+                case 6: return "SW⇙";
+                case 7: return "NW⇖";
+                case 0: return "N⇑";
+                case 1: return "E⇒";
+                case 2: return "S⇓";
+                case 3: return "W⇐";
+                default: return "Error";
             }
         }
         catch (Exception e){return "";}
