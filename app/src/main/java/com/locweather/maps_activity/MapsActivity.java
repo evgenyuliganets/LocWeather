@@ -2,14 +2,13 @@ package com.locweather.maps_activity;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.IntentSender;
+import android.graphics.PorterDuff;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -24,13 +23,12 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
@@ -45,10 +43,10 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.libraries.places.compat.Place;
-import com.google.android.libraries.places.compat.ui.PlaceAutocompleteFragment;
-import com.google.android.libraries.places.compat.ui.PlaceSelectionListener;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.locweather.R;
 import com.locweather.adapter.NoticeAdapter;
 import com.locweather.model.Main;
@@ -57,6 +55,7 @@ import com.locweather.model.Wind;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -67,9 +66,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ProgressBar progressBar;
     private MainContract.presenter presenter;
     private GoogleMap mMap;
-    private LatLng beginPoint=new LatLng(48.61667, 22.3);
+    private LatLng beginPoint;
     Button locButton;
-    public static LatLng currentLocation = new LatLng(48.61667, 22.3);
+    public static LatLng currentLocation;
     private FusedLocationProviderClient fusedLocationClient;
     private SupportMapFragment mapFragment;
     LatLng Point;
@@ -93,7 +92,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.map);
         assert mapFragment != null;
         mapFragment.getMapAsync(this);
-
         geo = new Geocoder(this, Locale.ENGLISH);
         setupAutoCompleteFragment();
         requestLocationPermission();
@@ -101,37 +99,39 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         LocationRequest locationRequest = LocationRequest.create();
         locationRequest.setInterval(20 * 1000);
         fusedLocationClient.getLastLocation()
-                .addOnSuccessListener(MapsActivity.this, new OnSuccessListener<Location>() {
-                    @SuppressLint("MissingPermission")
-                    public void onSuccess(final Location location) {
-                        // Got last known location. In some rare situations this can be null.
-                        if (location != null) {
-                            Location = location;
-                        }
-
+                .addOnSuccessListener(MapsActivity.this, location -> {
+                    // Got last known location. In some rare situations this can be null.
+                    if (location != null) {
+                        Location = location;
                     }
+
                 });
     }
 
     private void setupAutoCompleteFragment() {
-        PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment)
-                getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
+        Places.initialize(getApplicationContext(),getResources().getString(R.string.google_maps_key));
+        Places.createClient(this);
+        AutocompleteSupportFragment autocompleteFragment = (AutocompleteSupportFragment)
+                getSupportFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
+        assert autocompleteFragment != null;
+        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME,Place.Field.LAT_LNG));
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
-            public void onPlaceSelected(Place place) {
+            public void onPlaceSelected(@NonNull Place place) {
                 beginPoint = place.getLatLng();
                 mapFragment.getMapAsync(MapsActivity.this);
             }
 
 
             @Override
-            public void onError(Status status) {
-                Log.e("Error", status.getStatusMessage());
+            public void onError(@NonNull Status status) {
+                Toast.makeText(MapsActivity.this,"Please select address", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
 
+    @SuppressLint("MissingPermission")
     @Override
 
     public void onMapReady(GoogleMap googleMap) {
@@ -141,120 +141,113 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         presenter = new MainPresenterImpl(this, new GetNoticeIntractorImpl());
         setLoc(currentLocation);
         presenter.requestDataFromServer();
-        locButton.setOnClickListener(new View.OnClickListener() {
-            @SuppressLint("MissingPermission")
-            public void onClick(View v) {
-                requestLocationPermission();
-                requestCoarseLocationPermission();
-                final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-                if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                    Toast.makeText(MapsActivity.this, "Gps not enabled", Toast.LENGTH_SHORT).show();
-                    enableLoc();
-                } else {
-                    fusedLocationClient = LocationServices.getFusedLocationProviderClient(MapsActivity.this);
-                    fusedLocationClient.getLastLocation()
-                            .addOnSuccessListener(MapsActivity.this, new OnSuccessListener<Location>() {
-                                @TargetApi(Build.VERSION_CODES.N)
-                                @SuppressLint("MissingPermission")
-                                public void onSuccess(final Location location) {
-                                    if (location == null) {
-                                        if (Location != null) {
-                                            Point = new LatLng(Location.getLatitude(), Location.getLongitude());
-                                            setLoc(currentLocation = Point);
-                                            presenter.requestDataFromServer();
-                                            try {
-                                                addresses = geo.getFromLocation(Location.getLatitude(), Location.getLongitude(), 1);
-                                                Address address1 = addresses.get(0);
-                                                address=address1.getCountryName();
-                                                if (address1.getAdminArea()!=null) {address=address1.getAdminArea()+", "+address;}
-                                                if (address1.getLocality()!=null) {address=address1.getLocality()+", "+address;}
-                                            } catch (IOException e) {
-                                                if (address ==null || addresses==null) {
-                                                    address = "UnknownLocation";
-                                                    Toast.makeText(MapsActivity.this,"Cant take address,please check other location", Toast.LENGTH_SHORT).show();
-                                                }else{Toast.makeText(MapsActivity.this, "Cant take address,please turn on network", Toast.LENGTH_SHORT).show();}
-                                                address = "UnknownLocation";
-                                            }
-                                            setAddressMap(address);
-                                            mMap.clear();
-                                            mMap.addMarker(new MarkerOptions()
-                                                    .position(Point)
-                                                    .title(address)
-                                                    .snippet("By GPS")
-                                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
-                                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(Point, 5.5f));
-                                        } else {
-                                            Toast.makeText(MapsActivity.this, "Cant take location right now, please reload App and turn on gps", Toast.LENGTH_SHORT).show();
-                                        }
-
-                                    } else {
-                                        Point = new LatLng(location.getLatitude(), location.getLongitude());
-                                        setLoc(currentLocation = Point);
-                                        presenter.requestDataFromServer();
-                                        try {
-                                            addresses = geo.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-                                            Address address1 = addresses.get(0);
-                                            address=address1.getCountryName();
-                                            if (address1.getAdminArea()!=null) {address=address1.getAdminArea()+", "+address;}
-                                            if (address1.getLocality()!=null) {address=address1.getLocality()+", "+address;}
-                                        } catch (IOException e) {
-                                            if (address ==null || addresses==null) {
-                                                address = "UnknownLocation";
-                                                Toast.makeText(MapsActivity.this,"Cant take address,please check other location", Toast.LENGTH_SHORT).show();
-                                            }else{Toast.makeText(MapsActivity.this, "Cant take address,please turn on network", Toast.LENGTH_SHORT).show();}
+        locButton.setOnClickListener(v -> {
+            requestLocationPermission();
+            requestCoarseLocationPermission();
+            final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                Toast.makeText(MapsActivity.this, "Gps not enabled", Toast.LENGTH_SHORT).show();
+                enableLoc();
+            } else {
+                fusedLocationClient = LocationServices.getFusedLocationProviderClient(MapsActivity.this);
+                fusedLocationClient.getLastLocation()
+                        .addOnSuccessListener(MapsActivity.this, location -> {
+                            if (location == null) {
+                                if (Location != null) {
+                                    Point = new LatLng(Location.getLatitude(), Location.getLongitude());
+                                    setLoc(currentLocation = Point);
+                                    presenter.requestDataFromServer();
+                                    try {
+                                        addresses = geo.getFromLocation(Location.getLatitude(), Location.getLongitude(), 1);
+                                        Address address1 = addresses.get(0);
+                                        address=address1.getCountryName();
+                                        if (address1.getAdminArea()!=null) {address=address1.getAdminArea()+", "+address;}
+                                        if (address1.getLocality()!=null) {address=address1.getLocality()+", "+address;}
+                                    } catch (IOException e) {
+                                        if (address ==null || addresses==null) {
                                             address = "UnknownLocation";
-                                        }
-                                        setAddressMap(address);
-                                        mMap.clear();
-                                        mMap.addMarker(new MarkerOptions()
-                                                .position(Point)
-                                                .title(address)
-                                                .snippet("By GPS")
-                                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
-                                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(Point, 5.5f));
+                                            Toast.makeText(MapsActivity.this,"Cant take address,please check other location", Toast.LENGTH_SHORT).show();
+                                        }else{Toast.makeText(MapsActivity.this, "Cant take address,please turn on network", Toast.LENGTH_SHORT).show();}
+                                        address = "UnknownLocation";
                                     }
+                                    setAddressMap(address);
+                                    mMap.clear();
+                                    mMap.addMarker(new MarkerOptions()
+                                            .position(Point)
+                                            .title(address)
+                                            .snippet("By GPS")
+                                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+                                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(Point, 5.5f));
+                                } else {
+                                    Toast.makeText(MapsActivity.this, "Cant take location right now, please reload App and turn on gps", Toast.LENGTH_SHORT).show();
                                 }
-                            });
-                }
+
+                            } else {
+                                Point = new LatLng(location.getLatitude(), location.getLongitude());
+                                setLoc(currentLocation = Point);
+                                presenter.requestDataFromServer();
+                                try {
+                                    addresses = geo.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                                    Address address1 = addresses.get(0);
+                                    address=address1.getCountryName();
+                                    if (address1.getAdminArea()!=null) {address=address1.getAdminArea()+", "+address;}
+                                    if (address1.getLocality()!=null) {address=address1.getLocality()+", "+address;}
+                                } catch (IOException e) {
+                                    if (address ==null || addresses==null) {
+                                        address = "UnknownLocation";
+                                        Toast.makeText(MapsActivity.this,"Cant take address,please check other location", Toast.LENGTH_SHORT).show();
+                                    }else{Toast.makeText(MapsActivity.this, "Cant take address,please turn on network", Toast.LENGTH_SHORT).show();}
+                                    address = "UnknownLocation";
+                                }
+                                setAddressMap(address);
+                                mMap.clear();
+                                mMap.addMarker(new MarkerOptions()
+                                        .position(Point)
+                                        .title(address)
+                                        .snippet("By GPS")
+                                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+                                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(Point, 5.5f));
+                            }
+                        });
             }
         });
 
 
-        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-            @Override
-            public void onMapClick(LatLng point) {
-                /*If need multiply markers
-                 ArrayList<LatLng> allPoints = new ArrayList<>();
-                 allPoints.add(point);*/
-                try {
-                setLoc(point);
-                presenter.requestDataFromServer();
-                try {
-                    showProgress();
-                    addresses = geo.getFromLocation(point.latitude, point.longitude, 1);
-                    Address address = addresses.get(0);
-                    addressMap=address.getCountryName();
-                    if (address.getAdminArea()!=null) {addressMap=address.getAdminArea()+", "+addressMap;}
-                    if (address.getLocality()!=null) {addressMap=address.getLocality()+", "+addressMap;}
-                    setAddressMap(addressMap);
-                } catch (IOException e) {
-                    if (addressMap ==null || addresses==null) {
-                        addressMap = "UnknownLocation";
-                        Toast.makeText(MapsActivity.this,"Cant take address,please check other location", Toast.LENGTH_SHORT).show();
-                    }else{Toast.makeText(MapsActivity.this, "Cant take address,please turn on network", Toast.LENGTH_SHORT).show();}
-                    addressMap = "UnknownLocation";
-                }
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(point, 5.5f));
-                mMap.clear();
-                mMap.addMarker(new MarkerOptions().position(point)
-                        .title(addressMap)
-                        .snippet("OnClick"));
-            }
-                catch (Exception e){Toast.makeText(MapsActivity.this, "Cant place marker,please check other location", Toast.LENGTH_SHORT).show();
-                    addressMap = "UnknownLocation";}}
-        });
-        if (beginPoint != null) {
+        mMap.setOnMapClickListener(point -> {
+            /*If need multiply markers
+             ArrayList<LatLng> allPoints = new ArrayList<>();
+             allPoints.add(point);*/
             try {
+            setLoc(point);
+            presenter.requestDataFromServer();
+            try {
+                showProgress();
+                addresses = geo.getFromLocation(point.latitude, point.longitude, 1);
+                Address address = addresses.get(0);
+                addressMap=address.getCountryName();
+                if (address.getAdminArea()!=null) {addressMap=address.getAdminArea()+", "+addressMap;}
+                if (address.getLocality()!=null) {addressMap=address.getLocality()+", "+addressMap;}
+                setAddressMap(addressMap);
+            } catch (IOException e) {
+                if (addressMap ==null || addresses==null) {
+                    addressMap = "UnknownLocation";
+                    Toast.makeText(MapsActivity.this,"Cant take address,please check other location", Toast.LENGTH_SHORT).show();
+                }else{Toast.makeText(MapsActivity.this, "Cant take address,please turn on network", Toast.LENGTH_SHORT).show();}
+                addressMap = "UnknownLocation";
+            }
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(point, 5.5f));
+            mMap.clear();
+            mMap.addMarker(new MarkerOptions().position(point)
+                    .title(addressMap)
+                    .snippet("OnClick"));
+        }
+            catch (Exception e){Toast.makeText(MapsActivity.this, "Cant place marker,please check other location", Toast.LENGTH_SHORT).show();
+                addressMap = "UnknownLocation";}});
+        if (beginPoint != null) {
+            setLoc(currentLocation = beginPoint);
+            presenter.requestDataFromServer();
+            try {
+                showProgress();
                 addresses = geo.getFromLocation(beginPoint.latitude, beginPoint.longitude, 1);
                 Address address = addresses.get(0);
                 addressMap=address.getCountryName();
@@ -326,13 +319,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                             googleApiClient.connect();
                         }
                     })
-                    .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
-                        @Override
-                        public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
-                            Log.d("Location error", "Location error " + connectionResult.getErrorCode());
-                        }
-                    }).build();
+                    .addOnConnectionFailedListener(connectionResult -> Log.d("Location error", "Location error " + connectionResult.getErrorCode())).build();
             googleApiClient.connect();
 
             LocationRequest locationRequest = LocationRequest.create();
@@ -346,16 +333,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             PendingResult<LocationSettingsResult> result =
                     LocationServices.SettingsApi.checkLocationSettings(googleApiClient, builder.build());
-            result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
-                @Override
-                public void onResult(@NonNull LocationSettingsResult result) {
-                    final Status status = result.getStatus();
-                    if (status.getStatusCode() == LocationSettingsStatusCodes.RESOLUTION_REQUIRED) {
-                        try {
-                            status.startResolutionForResult(MapsActivity.this, REQUEST_LOCATION);
-                        } catch (IntentSender.SendIntentException e) {
-                            // Ignore the error.
-                        }
+            result.setResultCallback(result1 -> {
+                final Status status = result1.getStatus();
+                if (status.getStatusCode() == LocationSettingsStatusCodes.RESOLUTION_REQUIRED) {
+                    try {
+                        status.startResolutionForResult(MapsActivity.this, REQUEST_LOCATION);
+                    } catch (IntentSender.SendIntentException e) {
+                        // Ignore the error.
                     }
                 }
             });
@@ -382,6 +366,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void initProgressBar() {
         progressBar = new ProgressBar(this, null, android.R.attr.progressBarStyleLarge);
         progressBar.setIndeterminate(true);
+        progressBar.getIndeterminateDrawable()
+                .setColorFilter(ContextCompat.getColor(this, R.color.colorProgress), PorterDuff.Mode.SRC_IN );
 
         RelativeLayout relativeLayout = new RelativeLayout(this);
         relativeLayout.setGravity(Gravity.CENTER);
@@ -398,16 +384,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     /**
      * RecyclerItem click event listener
      * */
-    private RecyclerItemClickListener recyclerItemClickListener = new RecyclerItemClickListener() {
-        @Override
-        public void onItemClick(Notice notice) {
-
-            Toast.makeText(MapsActivity.this,
-                    "List title:  " + notice.getWeather(),
-                    Toast.LENGTH_LONG).show();
-
-        }
-    };
+    private RecyclerItemClickListener recyclerItemClickListener = notice -> Toast.makeText(MapsActivity.this,
+            "List title:  " + notice.getWeather(),
+            Toast.LENGTH_LONG).show();
 
 
     @Override

@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.room.Entity;
 
 import com.locweather.R;
 import com.locweather.maps_activity.MapsActivity;
@@ -22,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
+@Entity
 public class NoticeAdapter extends RecyclerView.Adapter<NoticeAdapter.EmployeeViewHolder> {
     private  Wind wind;
     private ArrayList<Notice> dataList;
@@ -48,21 +50,17 @@ public class NoticeAdapter extends RecyclerView.Adapter<NoticeAdapter.EmployeeVi
     @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(EmployeeViewHolder holder, @SuppressLint("RecyclerView") final int position) {
+        String m;
         if(getAddressMap()!=null){holder.txtNoticeAddress.setText("Loc: "+getAddressMap());}else{holder.txtNoticeAddress.setText("Loc: Unknown location");}
         holder.imageIcon.setImageURI(Uri.parse("android.resource://com.locweather/drawable/i"+dataList.get(position).getIcon()));
         holder.txtNoticeWind.setText("Wind: "+roundUp(+wind.getSpeed(),1)+"m/s, "+arrow());
         holder.txtNoticeTempMain.setText(roundUp(+main.getTemp(),1)+"°C");
         holder.txtNoticeWeather.setText(dataList.get(position).getWeather()+" : "+dataList.get(position).getInfo());
         holder.txtNoticeTemp.setText("Feels: "+roundUp(+main.getFeelsLike(),1)+"°C ");
-        holder.txtNoticeTime.setText(currentTime.toString());
+        holder.txtNoticeTime.setText(currentTime.toString().substring(0,currentTime.toString().length()-18));
         holder.txtNoticeHumidity.setText("Humidity: "+main.getHumidity()+"%");
         holder.txtNoticePressure.setText("Pressure: "+main.getPressure()+"hPa");
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                recyclerItemClickListener.onItemClick(dataList.get(position));
-            }
-        });
+        holder.itemView.setOnClickListener(v -> recyclerItemClickListener.onItemClick(dataList.get(position)));
     }
 
     public String getAddressMap() {

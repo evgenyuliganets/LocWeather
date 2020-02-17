@@ -38,7 +38,7 @@
                 android:layout_height="50dp"
                 android:layout_gravity="top|end"
                 android:backgroundTint="#03A9F4"
-                android:foreground="@android:drawable/ic_menu_mylocation" />
+                android:drawableBottom="@android:drawable/ic_menu_mylocation" />
 
             <fragment
                 android:id="@+id/map"
