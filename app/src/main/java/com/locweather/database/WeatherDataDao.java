@@ -1,4 +1,4 @@
-package com.locweather;
+package com.locweather.database;
 
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
@@ -13,7 +13,7 @@ import java.util.List;
 @Dao
 public interface WeatherDataDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void saveAll(List<WeatherData> posts);
+    void saveAll(List<WeatherData> weathers);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void save(WeatherData weather);
@@ -26,4 +26,5 @@ public interface WeatherDataDao {
 
     @Query("SELECT * FROM WeatherData")
     LiveData<List<WeatherData>> findAll();
+
 }

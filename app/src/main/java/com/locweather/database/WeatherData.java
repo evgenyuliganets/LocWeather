@@ -1,10 +1,8 @@
-package com.locweather;
+package com.locweather.database;
 
 import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
-
-import com.google.android.gms.maps.model.LatLng;
 @Entity
 public class WeatherData {
     @PrimaryKey(autoGenerate = true)
@@ -24,7 +22,7 @@ public class WeatherData {
     private Double locLon;
     public WeatherData(){}
     @Ignore
-    public WeatherData(String address, Double windSpeed, Integer windDegree, String datalistIcon,String datalistInfo,String datalistWeather, Double mainTemp,Double mainFeel,Integer mainHumidity,Integer mainPressure,String time,LatLng currentLocation,Double locLat,Double locLon) {
+    public WeatherData(String address, Double windSpeed, Integer windDegree, String datalistIcon,String datalistInfo,String datalistWeather, Double mainTemp,Double mainFeel,Integer mainHumidity,Integer mainPressure,String time ,Double locLat,Double locLon) {
         this.address = address;
         this.windSpeed = windSpeed;
         this.windDegree = windDegree;

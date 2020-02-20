@@ -16,6 +16,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -24,6 +25,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -62,7 +65,7 @@ import java.util.Locale;
 import pub.devrel.easypermissions.EasyPermissions;
 
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, MainContract.MainView {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, MainContract.MainView,DataBaseFragment.OnFragmentInteractionListener {
     private ProgressBar progressBar;
     private MainContract.presenter presenter;
     private GoogleMap mMap;
@@ -80,16 +83,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private GoogleApiClient googleApiClient;
     final static int REQUEST_LOCATION = 199;
     private RecyclerView recyclerView;
-
+    private Button databaseButton;
+    private FrameLayout fragmentContainer;
 
     @SuppressLint("MissingPermission")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
-        locButton = findViewById(R.id.button);
+        locButton = findViewById(R.id.loc_button);
         mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
+        fragmentContainer=findViewById(R.id.fragment_container);
+        databaseButton=findViewById(R.id.db_button);
         assert mapFragment != null;
         mapFragment.getMapAsync(this);
         geo = new Geocoder(this, Locale.ENGLISH);
@@ -106,6 +112,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     }
 
                 });
+        databaseButton.setOnClickListener(v -> {
+            DataBaseFragment fragment = DataBaseFragment.newInstance();
+            FragmentManager fragmentManager=getSupportFragmentManager();
+            FragmentTransaction transaction=fragmentManager.beginTransaction();
+            transaction.setCustomAnimations(R.anim.from_right,R.anim.to_right,R.anim.from_right,R.anim.to_right);
+            transaction.addToBackStack(null);
+            transaction.add(R.id.fragment_container,fragment,"DATA_BASE_FRAGMENT").commit();
+
+        });
     }
 
     private void setupAutoCompleteFragment() {
@@ -352,7 +367,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        recyclerView = findViewById(R.id.recycler_view_employee_list);
+        recyclerView = findViewById(R.id.notice_list);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(MapsActivity.this);
         recyclerView.setLayoutManager(layoutManager);
 
@@ -404,7 +419,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void setDataToRecyclerView(ArrayList<Notice> noticeArrayList, Main main, Wind wind) {
 
-        NoticeAdapter adapter = new NoticeAdapter(noticeArrayList, main ,wind, recyclerItemClickListener);
+        NoticeAdapter adapter = new NoticeAdapter(noticeArrayList, main ,wind, recyclerItemClickListener,MapsActivity.this);
         recyclerView.setAdapter(adapter);
 
     }
@@ -454,5 +469,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
 
-
+    @Override
+    public void onFragmentInteraction() {
+        onBackPressed();
+    }
 }
