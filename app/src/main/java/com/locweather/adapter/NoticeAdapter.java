@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -40,7 +41,6 @@ public class NoticeAdapter extends RecyclerView.Adapter<NoticeAdapter.EmployeeVi
     private static Date currentTime = Calendar.getInstance().getTime();
     public static String date;
     private Context mContext;
-    public static WeatherData weatherData;
 
     private RecyclerItemClickListener recyclerItemClickListener;
     public NoticeAdapter(ArrayList<Notice> dataList, Main main, Wind wind, RecyclerItemClickListener recyclerItemClickListener,Context context) {
@@ -73,9 +73,11 @@ public class NoticeAdapter extends RecyclerView.Adapter<NoticeAdapter.EmployeeVi
         holder.txtNoticeHumidity.setText("Humidity: "+main.getHumidity()+"%");
         holder.txtNoticePressure.setText("Pressure: "+main.getPressure()+"hPa");
         holder.itemView.setOnClickListener(v -> {
-            recyclerItemClickListener.onItemClick(dataList.get(position));
-            saveNoticeList(mContext,dataList);
-        });
+            recyclerItemClickListener.onItemClick();
+            saveNoticeList(mContext,dataList); });
+        holder.saveButton.setOnClickListener(v -> {
+            recyclerItemClickListener.onItemClick();
+            saveNoticeList(mContext,dataList); });
     }
 
     private static String getAddressMap() {
@@ -96,10 +98,12 @@ public class NoticeAdapter extends RecyclerView.Adapter<NoticeAdapter.EmployeeVi
 
     class EmployeeViewHolder extends RecyclerView.ViewHolder {
         ImageView imageIcon;
+        Button saveButton;
         TextView txtNoticeWeather, txtNoticeTempMain,txtNoticeTemp, txtNoticeHumidity,txtNoticeAddress,txtNoticePressure,txtNoticeWind,txtNoticeTime;
 
         EmployeeViewHolder(View itemView) {
             super(itemView);
+            saveButton=itemView.findViewById(R.id.save_button);
             imageIcon=itemView.findViewById(R.id.image_icon);
             txtNoticeTime= itemView.findViewById(R.id.txt_time);
             txtNoticeWind= itemView.findViewById(R.id.txt_notice_wind);
@@ -111,9 +115,9 @@ public class NoticeAdapter extends RecyclerView.Adapter<NoticeAdapter.EmployeeVi
             txtNoticeTempMain =  itemView.findViewById(R.id.txt_notice_temp_main);
         }
     }
-    public static void saveNoticeList(Context context, List<Notice> noticeList) {
+    private static void saveNoticeList(Context context, List<Notice> noticeList) {
         if (context != null && noticeList != null) {
-            weatherData= new WeatherData (getAddressMap(),wind.getSpeed(),wind.getDeg(),dataList.get(0).getIcon(),dataList.get(0).getInfo(),dataList.get(0).getWeather(),main.getTemp(),main.getFeelsLike(),main.getHumidity(),main.getPressure(),date,getloc().latitude,getloc().longitude);
+            WeatherData weatherData = new WeatherData(getAddressMap(), wind.getSpeed(), wind.getDeg(), dataList.get(0).getIcon(), dataList.get(0).getInfo(), dataList.get(0).getWeather(), main.getTemp(), main.getFeelsLike(), main.getHumidity(), main.getPressure(), date, getloc().latitude, getloc().longitude);
             WeatherDatabase.getInstance(context)
                     .weatherDao()
                     .save(weatherData);
@@ -148,7 +152,7 @@ public class NoticeAdapter extends RecyclerView.Adapter<NoticeAdapter.EmployeeVi
                 default: return "Error";
             }
         }
-        catch (Exception e){return "";}
+        catch (Exception e){return " ";}
 
     }
 

@@ -16,7 +16,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -83,8 +82,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private GoogleApiClient googleApiClient;
     final static int REQUEST_LOCATION = 199;
     private RecyclerView recyclerView;
-    private Button databaseButton;
-    private FrameLayout fragmentContainer;
 
     @SuppressLint("MissingPermission")
     @Override
@@ -94,8 +91,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         locButton = findViewById(R.id.loc_button);
         mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
-        fragmentContainer=findViewById(R.id.fragment_container);
-        databaseButton=findViewById(R.id.db_button);
+        Button databaseButton = findViewById(R.id.db_button);
         assert mapFragment != null;
         mapFragment.getMapAsync(this);
         geo = new Geocoder(this, Locale.ENGLISH);
@@ -182,7 +178,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                         if (address ==null || addresses==null) {
                                             address = "UnknownLocation";
                                             Toast.makeText(MapsActivity.this,"Cant take address,please check other location", Toast.LENGTH_SHORT).show();
-                                        }else{Toast.makeText(MapsActivity.this, "Cant take address,please turn on network", Toast.LENGTH_SHORT).show();}
+                                        }else{Toast.makeText(MapsActivity.this, "Cant take address,please turn on network or check database", Toast.LENGTH_LONG).show();}
                                         address = "UnknownLocation";
                                     }
                                     setAddressMap(address);
@@ -194,7 +190,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                             .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
                                     mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(Point, 5.5f));
                                 } else {
-                                    Toast.makeText(MapsActivity.this, "Cant take location right now, please reload App and turn on gps", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(MapsActivity.this, "Cant take location right now, please reload App and turn on gps or check database", Toast.LENGTH_LONG).show();
                                 }
 
                             } else {
@@ -211,7 +207,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                     if (address ==null || addresses==null) {
                                         address = "UnknownLocation";
                                         Toast.makeText(MapsActivity.this,"Cant take address,please check other location", Toast.LENGTH_SHORT).show();
-                                    }else{Toast.makeText(MapsActivity.this, "Cant take address,please turn on network", Toast.LENGTH_SHORT).show();}
+                                    }else{Toast.makeText(MapsActivity.this, "Cant take address,please turn on network or check database", Toast.LENGTH_LONG).show();}
                                     address = "UnknownLocation";
                                 }
                                 setAddressMap(address);
@@ -247,7 +243,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if (addressMap ==null || addresses==null) {
                     addressMap = "UnknownLocation";
                     Toast.makeText(MapsActivity.this,"Cant take address,please check other location", Toast.LENGTH_SHORT).show();
-                }else{Toast.makeText(MapsActivity.this, "Cant take address,please turn on network", Toast.LENGTH_SHORT).show();}
+                }else{Toast.makeText(MapsActivity.this, "Cant take address,please turn on network or check database", Toast.LENGTH_LONG).show();}
                 addressMap = "UnknownLocation";
             }
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(point, 5.5f));
@@ -272,7 +268,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if (addressMap ==null || addresses==null) {
                     addressMap = "UnknownLocation";
                     Toast.makeText(MapsActivity.this,"Cant take address,please check other location", Toast.LENGTH_SHORT).show();
-                }else{Toast.makeText(MapsActivity.this, "Cant take address,please turn on network", Toast.LENGTH_SHORT).show();}
+                }else{Toast.makeText(MapsActivity.this, "Cant take address,please turn on network or check database", Toast.LENGTH_LONG).show();}
                 addressMap = "UnknownLocation";
             }
             setAddressMap(addressMap);
@@ -354,7 +350,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     try {
                         status.startResolutionForResult(MapsActivity.this, REQUEST_LOCATION);
                     } catch (IntentSender.SendIntentException e) {
-                        // Ignore the error.
+                        Toast.makeText(MapsActivity.this, "Something went wrong.", Toast.LENGTH_SHORT).show();
                     }
                 }
             });
@@ -399,21 +395,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     /**
      * RecyclerItem click event listener
      * */
-    private RecyclerItemClickListener recyclerItemClickListener = notice -> Toast.makeText(MapsActivity.this,
-            "List title:  " + notice.getWeather(),
-            Toast.LENGTH_LONG).show();
+    private RecyclerItemClickListener recyclerItemClickListener = () -> Toast.makeText(MapsActivity.this,
+            "Successfully saved to database",
+            Toast.LENGTH_SHORT).show();
 
 
     @Override
-    public void showProgress() {
-        progressBar.setVisibility(View.VISIBLE);
-    }
+    public void showProgress() { progressBar.setVisibility(View.VISIBLE); }
 
 
     @Override
-    public void hideProgress() {
-        progressBar.setVisibility(View.INVISIBLE);
-    }
+    public void hideProgress() { progressBar.setVisibility(View.INVISIBLE); }
 
 
     @Override
@@ -464,13 +456,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         return super.onOptionsItemSelected(item);
     }
 
-    public void setLoc(LatLng loc) {
-        currentLocation = loc;
-    }
+    public void setLoc(LatLng loc) { currentLocation = loc; }
 
 
     @Override
-    public void onFragmentInteraction() {
-        onBackPressed();
-    }
+    public void onFragmentInteraction() { onBackPressed(); }
 }

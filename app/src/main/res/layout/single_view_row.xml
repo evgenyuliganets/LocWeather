@@ -10,124 +10,21 @@
     card_view:cardUseCompatPadding="true">
 
     <LinearLayout
-        android:layout_width="81dp"
-        android:layout_height="103dp"
-        android:layout_gravity="top|center_vertical"
-        android:layout_marginLeft="3dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/txt_notice_temp_main"
-            android:layout_width="85dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center|top"
-            android:textAlignment="center"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/txt_notice_temp"
-            android:layout_width="85dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center|top"
-            android:textAlignment="center"
-
+        <Button
+            android:id="@+id/save_button"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_gravity="bottom|end"
+            android:layout_marginBottom="-3dp"
+            android:background="@android:drawable/ic_menu_save"
+            android:backgroundTint="#3F793B"
+            android:backgroundTintMode="multiply"
             android:textSize="12sp" />
-
-        <ImageView
-            android:id="@+id/image_icon"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_gravity="center|top"
-            android:layout_marginTop="-9dp"
-            android:contentDescription="@string/todo"
-            tools:srcCompat="@drawable/quantum_ic_cloud_off_vd_theme_24" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="270dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center|top|end"
-        android:orientation="vertical"
-        android:paddingStart="2dp"
-        android:paddingTop="1dp"
-        android:paddingEnd="2dp"
-        android:textAlignment="center">
-
-        <!-- Text Notice Name -->
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="top|end"
-            android:paddingStart="2dp"
-            android:paddingTop="1dp"
-            android:paddingEnd="2dp"
-            android:paddingBottom="5dp">
-
-            <TextView
-                android:id="@+id/txt_notice_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="top|end"
-                android:textAlignment="center"
-                android:textStyle="bold" />
-        </TableRow>
-
-        <!-- Text Notice Description -->
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="end"
-            android:padding="1dp">
-
-            <TextView
-                android:id="@+id/txt_notice_weather"
-                android:layout_width="140dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end"
-                android:textAlignment="center"
-                android:textSize="13sp" />
-
-            <TextView
-                android:id="@+id/txt_notice_wind"
-                android:layout_width="140dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end"
-                android:layout_marginLeft="1dp"
-                android:textAlignment="inherit"
-                android:textSize="13sp"
-                tools:ignore="RtlHardcoded" />
-
-        </TableRow>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="end"
-            android:padding="1dp">
-
-            <TextView
-                android:id="@+id/txt_notice_pressure"
-                android:layout_width="140dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end"
-                android:textAlignment="center"
-                android:textSize="13sp" />
-
-            <TextView
-                android:id="@+id/txt_notice_humidity"
-                android:layout_width="140dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end"
-                android:layout_marginLeft="1dp"
-                android:textAlignment="inherit"
-                android:textSize="13sp"
-                tools:ignore="RtlHardcoded" />
-
-        </TableRow>
-
     </LinearLayout>
 
     <LinearLayout
@@ -154,18 +51,146 @@
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="bottom|end"
-        android:orientation="vertical">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/save_button"
-            android:layout_width="28dp"
-            android:layout_height="36dp"
-            android:layout_gravity="bottom|end"
-            android:layout_marginBottom="-4dp"
-            android:textSize="12sp" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="81dp"
+                android:layout_height="103dp"
+                android:layout_gravity="top|center_vertical"
+                android:layout_marginLeft="3dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/txt_notice_temp_main"
+                    android:layout_width="85dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center|top"
+                    android:textAlignment="center"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/txt_notice_temp"
+                    android:layout_width="85dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center|top"
+                    android:textAlignment="center"
+
+                    android:textSize="12sp" />
+
+                <ImageView
+                    android:id="@+id/image_icon"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_gravity="center|top"
+                    android:layout_marginTop="-9dp"
+                    android:contentDescription="@string/todo"
+                    tools:srcCompat="@drawable/quantum_ic_cloud_off_vd_theme_24" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="end"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="270dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|center"
+                android:orientation="vertical"
+                android:paddingStart="2dp"
+                android:paddingTop="1dp"
+                android:paddingEnd="2dp"
+                android:textAlignment="center">
+
+                <!-- Text Notice Name -->
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="top|end"
+                    android:paddingStart="2dp"
+                    android:paddingTop="1dp"
+                    android:paddingEnd="2dp"
+                    android:paddingBottom="5dp">
+
+                    <TextView
+                        android:id="@+id/txt_notice_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="top|end"
+                        android:textAlignment="center"
+                        android:textStyle="bold" />
+                </TableRow>
+
+                <!-- Text Notice Description -->
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="end"
+                    android:padding="1dp">
+
+                    <TextView
+                        android:id="@+id/txt_notice_weather"
+                        android:layout_width="140dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:textAlignment="center"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:id="@+id/txt_notice_wind"
+                        android:layout_width="140dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:layout_marginLeft="1dp"
+                        android:textAlignment="inherit"
+                        android:textSize="13sp"
+                        tools:ignore="RtlHardcoded" />
+
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="end"
+                    android:padding="1dp">
+
+                    <TextView
+                        android:id="@+id/txt_notice_pressure"
+                        android:layout_width="140dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:textAlignment="center"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:id="@+id/txt_notice_humidity"
+                        android:layout_width="140dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:layout_marginLeft="1dp"
+                        android:textAlignment="inherit"
+                        android:textSize="13sp"
+                        tools:ignore="RtlHardcoded" />
+
+                </TableRow>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>

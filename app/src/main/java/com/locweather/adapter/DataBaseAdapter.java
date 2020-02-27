@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -14,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.locweather.R;
 import com.locweather.database.WeatherData;
+import com.locweather.maps_activity.RecyclerItemClickListener;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -22,14 +24,14 @@ import java.util.List;
 public class DataBaseAdapter extends RecyclerView.Adapter<DataBaseAdapter.DataViewHolder> {
 
     private List<WeatherData> data;
-    private Context context;
     private LayoutInflater layoutInflater;
     private OnDeleteButtonClickListener onDeleteButtonClickListener;
-    public DataBaseAdapter(Context context, OnDeleteButtonClickListener listener) {
+    private RecyclerItemClickListener recyclerItemClickListener;
+    public DataBaseAdapter(Context context, OnDeleteButtonClickListener listener,RecyclerItemClickListener recyclerItemClickListener) {
         this.data = new ArrayList<>();
-        this.context = context;
         this.onDeleteButtonClickListener = listener;
         this.layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        this.recyclerItemClickListener = recyclerItemClickListener;
     }
 
     @NonNull
@@ -58,7 +60,7 @@ public class DataBaseAdapter extends RecyclerView.Adapter<DataBaseAdapter.DataVi
     }
 
     class DataViewHolder extends RecyclerView.ViewHolder {
-
+        Button deleteButton;
         ImageView imageIcon;
         TextView txtNoticeWeather, txtNoticeTempMain,txtNoticeTemp, txtNoticeHumidity,txtNoticeAddress,txtNoticePressure,txtNoticeWind,txtNoticeTime;
 
@@ -73,6 +75,7 @@ public class DataBaseAdapter extends RecyclerView.Adapter<DataBaseAdapter.DataVi
             txtNoticeHumidity =  itemView.findViewById(R.id.txt_db_humidity);
             txtNoticePressure =  itemView.findViewById(R.id.txt_db_pressure);
             txtNoticeTempMain =  itemView.findViewById(R.id.txt_db_temp_main);
+            deleteButton=itemView.findViewById(R.id.delete_button);
 
         }
 
@@ -81,16 +84,22 @@ public class DataBaseAdapter extends RecyclerView.Adapter<DataBaseAdapter.DataVi
             if (weather != null) {
                 if(weather.getAddress()!=null){txtNoticeAddress.setText("Loc: "+weather.getAddress());}else{txtNoticeAddress.setText("Loc: Unknown location");}
                 imageIcon.setImageURI(Uri.parse("android.resource://com.locweather/drawable/i"+weather.getDatalistIcon()));
-                txtNoticeWind.setText("Wind: "+roundUp(+weather.getWindSpeed())+"m/s, "+arrow(weather.getWindDegree()));
+                if(weather.getWindDegree()!=null)txtNoticeWind.setText("Wind: "+roundUp(weather.getWindSpeed())+"m/s, "+arrow(weather.getWindDegree())); else {txtNoticeWind.setText("Wind: "+roundUp(weather.getWindSpeed())+"m/s");}
                 txtNoticeTempMain.setText(roundUp(+weather.getMainTemp())+"°C");
                 txtNoticeWeather.setText(weather.getDatalistWeather()+" : "+weather.getDatalistInfo());
                 txtNoticeTemp.setText("Feels: "+roundUp(+weather.getMainFeel())+"°C ");
                 txtNoticeTime.setText(weather.getTime());
                 txtNoticeHumidity.setText("Humidity: "+weather.getMainHumidity()+"%");
                 txtNoticePressure.setText("Pressure: "+weather.getMainPressure()+"hPa");
+                deleteButton.setOnClickListener(v -> {
+                    if (onDeleteButtonClickListener != null)
+                        recyclerItemClickListener.onItemClick();
+                        onDeleteButtonClickListener.onDeleteButtonClicked(weather);
+                });
                 itemView.setOnClickListener(v -> {
                     if (onDeleteButtonClickListener != null)
-                        onDeleteButtonClickListener.onDeleteButtonClicked(weather);
+                        recyclerItemClickListener.onItemClick();
+                    onDeleteButtonClickListener.onDeleteButtonClicked(weather);
                 });
 
             }
@@ -123,7 +132,7 @@ public class DataBaseAdapter extends RecyclerView.Adapter<DataBaseAdapter.DataVi
                     default: return "Error";
                 }
             }
-            catch (Exception e){return "";}
+            catch (Exception e){return " ";}
 
         }
 

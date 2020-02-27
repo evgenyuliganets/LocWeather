@@ -6,9 +6,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -22,50 +24,49 @@ import java.util.Objects;
 public class DataBaseFragment extends Fragment implements DataBaseAdapter.OnDeleteButtonClickListener{
 
     private OnFragmentInteractionListener mListener;
-    private DataBaseAdapter datasAdapter;
+    private DataBaseAdapter dataAdapter;
     private WeatherViewModel weatherViewModel;
     public DataBaseFragment() {
         // Required empty public constructor
     }
 
-    public static DataBaseFragment newInstance() {
-        DataBaseFragment fragment = new DataBaseFragment();
-        return fragment;
+    static DataBaseFragment newInstance() {
+        return new DataBaseFragment();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        datasAdapter= new DataBaseAdapter(Objects.requireNonNull(getContext()), this);
+        dataAdapter= new DataBaseAdapter(Objects.requireNonNull(getContext()), this,recyclerItemClickListener);
 
-        weatherViewModel = ViewModelProviders.of(this).get(WeatherViewModel.class);
-        weatherViewModel.getAllPosts().observe(this, posts -> datasAdapter.setData(posts));
+        weatherViewModel =new ViewModelProvider(this).get(WeatherViewModel.class);
+        weatherViewModel.getAllPosts().observe(this, posts -> dataAdapter.setData(posts));
 
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View view=inflater.inflate(R.layout.fragment_data_base, container, false);
         RecyclerView recyclerView = view.findViewById(R.id.database_list);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(datasAdapter);
+        recyclerView.setAdapter(dataAdapter);
         Button buttonFragment = view.findViewById(R.id.back_button);
-        buttonFragment.setOnClickListener(v -> {
-            onButtonPressed();
-        });
+        buttonFragment.setOnClickListener(v -> onButtonPressed());
         return view;
     }
 
-    public void onButtonPressed() {
+    private void onButtonPressed() {
         if (mListener != null) {
             mListener.onFragmentInteraction();
         }
     }
-
+    private RecyclerItemClickListener recyclerItemClickListener = () -> Toast.makeText(getContext(),
+            "Successfully deleted",
+            Toast.LENGTH_SHORT).show();
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
@@ -87,7 +88,6 @@ public class DataBaseFragment extends Fragment implements DataBaseAdapter.OnDele
     }
 
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
         void onFragmentInteraction();
     }
 }

@@ -14,11 +14,11 @@ import java.util.List;
 import java.util.concurrent.Executors;
 
 
-@Database(entities = {WeatherData.class}, version = 1)
+@Database(entities = {WeatherData.class}, version = 1, exportSchema = false)
 public abstract class WeatherDatabase extends RoomDatabase {
     public static WeatherDatabase INSTANCE;
     private final static List<WeatherData> POSTS = Arrays.asList(
-            new WeatherData("safsad",2.2,3,"fsdfsdf","fsdfdsf","fsdfdsf",4.4,3.5,3,2,"fsdfdsf",1.2,5.3));
+            new WeatherData("Example Location \n You can delete it",0.0,0,"01d","example","Example",0.0,0.0,0,0,"DD MM TT",36.5,30.3));
 
     public abstract WeatherDataDao weatherDao();
     private static final Object sLock = new Object();
