@@ -90,63 +90,63 @@ public class WeatherData {
         return time;
     }
 
-    public Double getLocLat() {
+     Double getLocLat() {
         return locLat;
     }
 
-    public Double getLocLon() {
+     Double getLocLon() {
         return locLon;
     }
 
-    public void setAddress(String address) {
+    void setAddress(String address) {
         this.address = address;
     }
 
-    public void setWindSpeed(Double windSpeed) {
+    void setWindSpeed(Double windSpeed) {
         this.windSpeed = windSpeed;
     }
 
-    public void setWindDegree(Integer windDegree) {
+    void setWindDegree(Integer windDegree) {
         this.windDegree = windDegree;
     }
 
-    public void setDatalistIcon(String datalistIcon) {
+    void setDatalistIcon(String datalistIcon) {
         this.datalistIcon = datalistIcon;
     }
 
-    public void setDatalistInfo(String datalistInfo) {
+    void setDatalistInfo(String datalistInfo) {
         this.datalistInfo = datalistInfo;
     }
 
-    public void setDatalistWeather(String datalistWeather) {
+    void setDatalistWeather(String datalistWeather) {
         this.datalistWeather = datalistWeather;
     }
 
-    public void setMainTemp(Double mainTemp) {
+    void setMainTemp(Double mainTemp) {
         this.mainTemp = mainTemp;
     }
 
-    public void setMainFeel(Double mainFeel) {
+    void setMainFeel(Double mainFeel) {
         this.mainFeel = mainFeel;
     }
 
-    public void setMainHumidity(Integer mainHumidity) {
+    void setMainHumidity(Integer mainHumidity) {
         this.mainHumidity = mainHumidity;
     }
 
-    public void setMainPressure(Integer mainPressure) {
+    void setMainPressure(Integer mainPressure) {
         this.mainPressure = mainPressure;
     }
 
-    public void setTime(String time) {
+    void setTime(String time) {
         this.time = time;
     }
 
-    public void setLocLat(Double locLat) {
+    void setLocLat(Double locLat) {
         this.locLat = locLat;
     }
 
-    public void setLocLon(Double locLon) {
+    void setLocLon(Double locLon) {
         this.locLon = locLon;
     }
 }

@@ -6,12 +6,23 @@ import com.google.android.gms.maps.model.LatLng;
 import com.locweather.main_interface.GetNoticeDataService;
 import com.locweather.network.RetrofitInstance;
 
+import javax.inject.Inject;
+
+import dagger.Binds;
+import dagger.Module;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.locweather.maps_activity.MapsActivity.currentLocation;
 
 public class GetNoticeIntractorImpl implements MainContract.GetNoticeIntractor {
+    GetNoticeDataService service;
+    @Inject
+    public GetNoticeIntractorImpl(GetNoticeDataService service) {
+        this.service = service;
+    }
+
+
     private LatLng getloc(){
         return currentLocation;
     }
@@ -20,7 +31,7 @@ public class GetNoticeIntractorImpl implements MainContract.GetNoticeIntractor {
     public void getNoticeArrayList(final OnFinishedListener onFinishedListener) {
 
         /** Create handle for the RetrofitInstance interface*/
-        GetNoticeDataService service = RetrofitInstance.getRetrofitInstance().create(GetNoticeDataService.class);
+        service = RetrofitInstance.getRetrofitInstance().create(GetNoticeDataService.class);
         /** Using RxJava Observable response to handle retrofit api*/
         if(currentLocation!=null) {
             service.getNoticeData(getloc().latitude, getloc().longitude)
@@ -30,5 +41,9 @@ public class GetNoticeIntractorImpl implements MainContract.GetNoticeIntractor {
 
         }
     }
-
+    @Module
+    public abstract class AnotherModule {
+        @Binds
+        abstract MainContract.GetNoticeIntractor bindGetNoticeInteractor(GetNoticeIntractorImpl implementation);
+    }
 }

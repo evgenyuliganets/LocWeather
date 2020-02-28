@@ -165,7 +165,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|start"
-        android:layout_marginLeft="3dp"
         android:layout_marginBottom="-2dp"
         android:background="#33AFAFAF"
         android:gravity="center"
@@ -179,6 +178,8 @@
             android:layout_gravity="bottom|start"
             android:alpha="0.5"
             android:gravity="center"
+            android:paddingStart="3dp"
+            android:paddingEnd="3dp"
             android:textColor="#313131"
             android:textSize="12sp" />
 

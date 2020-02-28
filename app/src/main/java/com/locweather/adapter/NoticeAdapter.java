@@ -12,7 +12,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.room.Entity;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.locweather.R;
@@ -32,13 +31,12 @@ import java.util.List;
 
 import static com.locweather.maps_activity.MapsActivity.currentLocation;
 
-@Entity
 public class NoticeAdapter extends RecyclerView.Adapter<NoticeAdapter.EmployeeViewHolder> {
 
     private static Wind wind;
     private static ArrayList<Notice> dataList;
     private static Main main;
-    private static Date currentTime = Calendar.getInstance().getTime();
+    private Date currentTime = Calendar.getInstance().getTime();
     public static String date;
     private Context mContext;
 
@@ -131,15 +129,13 @@ public class NoticeAdapter extends RecyclerView.Adapter<NoticeAdapter.EmployeeVi
         try {
             int st = wind.getDeg();
             int switchy = 0;
-            if (st == 0) switchy = 0;
-            else if (st > 0 && st < 90) switchy = 4;
+            if (st > 0 && st < 90) switchy = 4;
             else if (st > 90 && st < 180) switchy = 5;
             else if (st > 180 && st < 270) switchy = 6;
             else if (st > 270 && st < 360) switchy = 7;
             else if (st == 90) switchy = 1;
             else if (st == 180) switchy = 2;
             else if (st == 270) switchy = 3;
-            else if (st == 360) switchy = 0;
             switch (switchy) {
                 case 4: return "NE⇗";
                 case 5: return "SE⇘";

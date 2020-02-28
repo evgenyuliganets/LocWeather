@@ -20,6 +20,7 @@ import com.locweather.maps_activity.RecyclerItemClickListener;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class DataBaseAdapter extends RecyclerView.Adapter<DataBaseAdapter.DataViewHolder> {
 
@@ -94,12 +95,12 @@ public class DataBaseAdapter extends RecyclerView.Adapter<DataBaseAdapter.DataVi
                 deleteButton.setOnClickListener(v -> {
                     if (onDeleteButtonClickListener != null)
                         recyclerItemClickListener.onItemClick();
-                        onDeleteButtonClickListener.onDeleteButtonClicked(weather);
+                        Objects.requireNonNull(onDeleteButtonClickListener).onDeleteButtonClicked(weather);
                 });
                 itemView.setOnClickListener(v -> {
                     if (onDeleteButtonClickListener != null)
                         recyclerItemClickListener.onItemClick();
-                    onDeleteButtonClickListener.onDeleteButtonClicked(weather);
+                    Objects.requireNonNull(onDeleteButtonClickListener).onDeleteButtonClicked(weather);
                 });
 
             }
@@ -109,17 +110,14 @@ public class DataBaseAdapter extends RecyclerView.Adapter<DataBaseAdapter.DataVi
         }
         private String arrow(int deg){
             try {
-                int st = deg;
                 int switchy = 0;
-                if (st == 0) switchy = 0;
-                else if (st > 0 && st < 90) switchy = 4;
-                else if (st > 90 && st < 180) switchy = 5;
-                else if (st > 180 && st < 270) switchy = 6;
-                else if (st > 270 && st < 360) switchy = 7;
-                else if (st == 90) switchy = 1;
-                else if (st == 180) switchy = 2;
-                else if (st == 270) switchy = 3;
-                else if (st == 360) switchy = 0;
+                if (deg > 0 && deg < 90) switchy = 4;
+                else if (deg > 90 && deg < 180) switchy = 5;
+                else if (deg > 180 && deg < 270) switchy = 6;
+                else if (deg > 270 && deg < 360) switchy = 7;
+                else if (deg == 90) switchy = 1;
+                else if (deg == 180) switchy = 2;
+                else if (deg == 270) switchy = 3;
                 switch (switchy) {
                     case 4: return "NE⇗";
                     case 5: return "SE⇘";

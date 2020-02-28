@@ -9,16 +9,16 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executors;
 
 
 @Database(entities = {WeatherData.class}, version = 1, exportSchema = false)
 public abstract class WeatherDatabase extends RoomDatabase {
-    public static WeatherDatabase INSTANCE;
-    private final static List<WeatherData> POSTS = Arrays.asList(
-            new WeatherData("Example Location \n You can delete it",0.0,0,"01d","example","Example",0.0,0.0,0,0,"DD MM TT",36.5,30.3));
+    private static WeatherDatabase INSTANCE;
+    private final static List<WeatherData> POSTS = Collections.singletonList(
+            new WeatherData("Example Location \n You can delete it", 0.0, 0, "01d", "example", "Example", 0.0, 0.0, 0, 0, "DD MM TT", 36.5, 30.3));
 
     public abstract WeatherDataDao weatherDao();
     private static final Object sLock = new Object();

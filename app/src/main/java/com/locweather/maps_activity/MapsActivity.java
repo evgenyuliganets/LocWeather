@@ -51,6 +51,8 @@ import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.locweather.R;
 import com.locweather.adapter.NoticeAdapter;
+import com.locweather.di.DaggerMapsComponent;
+import com.locweather.di.MapsComponent;
 import com.locweather.model.Main;
 import com.locweather.model.Notice;
 import com.locweather.model.Wind;
@@ -66,7 +68,7 @@ import pub.devrel.easypermissions.EasyPermissions;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, MainContract.MainView,DataBaseFragment.OnFragmentInteractionListener {
     private ProgressBar progressBar;
-    private MainContract.presenter presenter;
+    public MainPresenterImpl presenter;
     private GoogleMap mMap;
     private LatLng beginPoint;
     Button locButton;
@@ -82,10 +84,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private GoogleApiClient googleApiClient;
     final static int REQUEST_LOCATION = 199;
     private RecyclerView recyclerView;
+    public MapsComponent mapsComponent;
 
     @SuppressLint("MissingPermission")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        mapsComponent= DaggerMapsComponent.factory().create(getApplication());
+        mapsComponent.bindMainActivity(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         locButton = findViewById(R.id.loc_button);
@@ -149,7 +154,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap = googleMap;
         initializeToolbarAndRecyclerView();
         initProgressBar();
-        presenter = new MainPresenterImpl(this, new GetNoticeIntractorImpl());
+        presenter = new MainPresenterImpl(this, new GetNoticeIntractorImpl((lat, lon) -> null));
         setLoc(currentLocation);
         presenter.requestDataFromServer();
         locButton.setOnClickListener(v -> {
@@ -188,7 +193,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                             .title(address)
                                             .snippet("By GPS")
                                             .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
-                                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(Point, 5.5f));
+                                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(Point, 6.5f));
                                 } else {
                                     Toast.makeText(MapsActivity.this, "Cant take location right now, please reload App and turn on gps or check database", Toast.LENGTH_LONG).show();
                                 }
@@ -217,7 +222,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                         .title(address)
                                         .snippet("By GPS")
                                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
-                                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(Point, 5.5f));
+                                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(Point, 6.5f));
                             }
                         });
             }
@@ -246,7 +251,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }else{Toast.makeText(MapsActivity.this, "Cant take address,please turn on network or check database", Toast.LENGTH_LONG).show();}
                 addressMap = "UnknownLocation";
             }
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(point, 5.5f));
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(point, 6.5f));
             mMap.clear();
             mMap.addMarker(new MarkerOptions().position(point)
                     .title(addressMap)
@@ -272,7 +277,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 addressMap = "UnknownLocation";
             }
             setAddressMap(addressMap);
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(beginPoint, 5.5f));
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(beginPoint, 6.5f));
             mMap.clear();
             mMap.addMarker(new MarkerOptions()
                     .position(beginPoint)
@@ -461,4 +466,5 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onFragmentInteraction() { onBackPressed(); }
+
 }
